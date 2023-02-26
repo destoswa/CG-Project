@@ -201,7 +201,7 @@ void main() {
 
 	gl_FragColor = vec4(pix_color, 1.);
 
-	// vec3 my_color = 2.*vec3(0.5, 0, 0);
+	// vec3 my_color = 2.*vec3(0.1961, 0.4431, 0.6471);
 	// vec3 my_color = vec3(ray_direction.x, ray_direction.y. 0);
 	// gl_FragColor = vec4(my_color, 1.);
 }
