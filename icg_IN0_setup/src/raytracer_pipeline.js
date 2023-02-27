@@ -17,7 +17,7 @@ const SCENES = [{
 	name: "basic-sphere",
 	materials: [
 		{name: 'green', color: [0.3, 1., 0.4], ambient: 1., diffuse: 0., specular: 0., shininess: 0., mirror: 0.},
-		{name: 'custom', color: [0.1961, 0.4431, 0.6471], ambient: 1., diffuse: 0., specular: 0., shininess: 0., mirror: 0.}
+		{name: 'custom', color: [1., 1., 1.], ambient: 1., diffuse: 0., specular: 0., shininess: 0., mirror: 0.}
 	],
 	lights: [
 		{position: [3., 0, -0.5], color: [1.0, 0.4, 0.2]},

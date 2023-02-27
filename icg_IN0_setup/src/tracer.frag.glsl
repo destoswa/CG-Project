@@ -196,7 +196,7 @@ void main() {
 
 	} else {
 		// #TODO IN0.1: Set your background color here
-		pix_color = vec3(0.5216, 0.1765, 0.5686);
+		pix_color = vec3(0.7, 0., 0.2);
 	}
 
 	gl_FragColor = vec4(pix_color, 1.);
