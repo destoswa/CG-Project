@@ -175,7 +175,7 @@ bool ray_plane_intersection(
 	The plane is described by its normal vec3(nx, ny, nz) and an offset d.
 	Point p belongs to the plane iff `dot(normal, p) = d`.
 
-	- compute the ray's ntersection of the plane
+	- compute the ray's intersection of the plane
 	- if ray and plane are parallel there is no intersection
 	- otherwise compute intersection data and store it in `normal`, and `t` (distance along ray until intersection).
 	- return whether there is an intersection in front of the viewer (t > 0)
@@ -184,8 +184,31 @@ bool ray_plane_intersection(
 	// can use the plane center if you need it
 	vec3 plane_center = plane_normal * plane_offset;
 	t = MAX_RANGE + 10.;
-	//normal = ...;
-	return false;
+
+	vec2 solutions; // solutions will be stored here
+	
+	int num_solutions = solve_quadratic(
+		// A: 0
+		0., 
+		// B: dot(n,d)
+		dot(plane_normal, ray_direction),	
+		// C: dot(n,o) - d			
+		dot(plane_normal,ray_origin) - plane_offset,
+		// where to store solutions
+		solutions
+	);
+
+	if (num_solutions == 1) {
+		t = solutions[0];
+	}
+
+	if (t < MAX_RANGE && t > 0.) {
+		vec3 intersection_point = ray_origin + ray_direction * t;
+		normal = -plane_normal * sign(dot(ray_direction,plane_normal));
+		return true;
+	} else {
+		return false;
+	}	
 }
 
 /*
@@ -207,8 +230,58 @@ bool ray_cylinder_intersection(
 
 	vec3 intersection_point;
 	t = MAX_RANGE + 10.;
+	
+	vec2 solutions; // solutions will be stored here
+	vec3 x0 = cyl.center;
+	vec3 v = cyl.axis;
+	vec3 o = ray_origin;
+	vec3 d = ray_direction;
+	v = v/length(v);
+	d = d/length(d);
 
-	return false;
+	int num_solutions = solve_quadratic(
+		// A: 0
+		dot(d,d) - dot(d,v)*dot(d,v),
+		// B: dot(n,d)
+		2.*dot(d,o-x0)-2.*dot(d,v)*dot(o-x0,v),
+		// C: dot(n,o) - d			
+		dot(o-x0,o-x0)-cyl.radius*cyl.radius - dot(o-x0,v)*dot(o-x0,v),
+		// where to store solutions
+		solutions
+	);
+	// load the different possible solutions
+	vec2 ts = vec2(MAX_RANGE + 5., MAX_RANGE + 5.);
+	if (num_solutions >= 1 && solutions[0] > 0.) {
+		ts[0] = solutions[0];
+		if(num_solutions == 2 && solutions[1] > 0.){
+			ts[1] = solutions[1];
+		}
+
+		vec3 projSol;
+		// loop on the different solutions
+		for(int i = 0; i<2;i++){
+			if(i==num_solutions){break;}
+			// projection of the vector going from the origin of the cylindre to the solution to the axis of the cylindre (!!!PROBABLY A MISTAKE HERE!!!)
+			vec3 x0Sol = o+ts[i]*d - x0;
+			vec3 proj = x0 + dot(x0Sol,v) * v;
+			// if the solution is on the real cylindre (not infinite one) and the closest to the ray origin, update t and projection
+			if(length(proj) <= cyl.height/2. && ts[i] < t){
+				t = ts[i];
+				projSol = proj;
+			}
+		}
+		if(t < MAX_RANGE && t > 0.){
+			vec3 intersection_point = o + d * t;
+			vec3 center_point = x0 + projSol;
+			normal = (intersection_point - center_point)/cyl.radius;
+			
+			return true;
+		}else{
+			return false;
+		}
+	}else{
+		return false;
+	}
 }
 
 
