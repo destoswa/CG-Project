@@ -240,11 +240,11 @@ bool ray_cylinder_intersection(
 	d = d/length(d);
 
 	int num_solutions = solve_quadratic(
-		// A: 0
+		// A
 		dot(d,d) - dot(d,v)*dot(d,v),
-		// B: dot(n,d)
+		// B
 		2.*dot(d,o-x0)-2.*dot(d,v)*dot(o-x0,v),
-		// C: dot(n,o) - d			
+		// C		
 		dot(o-x0,o-x0)-cyl.radius*cyl.radius - dot(o-x0,v)*dot(o-x0,v),
 		// where to store solutions
 		solutions
@@ -263,7 +263,7 @@ bool ray_cylinder_intersection(
 			if(i==num_solutions){break;}
 			// projection of the vector going from the origin of the cylindre to the solution to the axis of the cylindre (!!!PROBABLY A MISTAKE HERE!!!)
 			vec3 x0Sol = o+ts[i]*d - x0;
-			vec3 proj = x0 + dot(x0Sol,v) * v;
+			vec3 proj = dot(x0Sol,v)*v;
 			// if the solution is on the real cylindre (not infinite one) and the closest to the ray origin, update t and projection
 			if(length(proj) <= cyl.height/2. && ts[i] < t){
 				t = ts[i];
