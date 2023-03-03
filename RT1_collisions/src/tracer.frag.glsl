@@ -273,8 +273,7 @@ bool ray_cylinder_intersection(
 		if(t < MAX_RANGE && t > 0.){
 			vec3 intersection_point = o + d * t;
 			vec3 center_point = x0 + projSol;
-			normal = (intersection_point - center_point)/cyl.radius;
-			
+			normal = -(intersection_point - center_point)/cyl.radius* sign(dot(d,intersection_point - center_point));
 			return true;
 		}else{
 			return false;
