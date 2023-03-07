@@ -20,6 +20,10 @@ Task RT1.2.2: Implement Ray-Cylinder intersections
 	From the expression derived in the previous task, we solve the quadratic formula for the cylinder like we 	did for the plane and derive up to two possible intersections. We make sure the intersections are on the 	cylinder by projecting them on the axis and making sure the distance between the cylinder center and 	projection is smaller than half the height of the cylinder, and save the smallest valid value of t. The 	normal is defined as the direction between the projection of the intersection point on the axis and the 	intersection point itself. The same treatment as with the plane is applied to the normal to make sure it's 	facing the right direction (solved an issue where the normal on the inner cylinder was facing the wrong 	way).
 
 
+Custom scenes
+
+A custom scene was added for fun, the files "scene_custom_normals.png", "export_scene_custom.js" and "scenes.js" were thus added to the zip file.
+
 Contribution:
 
 Alice: 1/3	Jad: 1/3	Swann:1/3
