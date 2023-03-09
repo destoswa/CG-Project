@@ -287,6 +287,7 @@ bool ray_cylinder_intersection(
 	}
 }
 
+
 /*
 	Check for intersection of the ray with any object in the scene.
 */
@@ -369,6 +370,8 @@ bool ray_intersection(
 	Return the color at an intersection point given a light and a material, exluding the contribution
 	of potential reflected rays.
 */
+
+
 vec3 lighting(
 		vec3 object_point, vec3 object_normal, vec3 direction_to_camera, 
 		Light light, Material mat) {
@@ -392,29 +395,35 @@ vec3 lighting(
 		diffuse = light.color*md*nl;
 	}
 
+	vec3 ms = mat.color*mat.specular;
+	vec3 r = normalize(2.*n*dot(n, l) - l);
+	vec3 v = normalize(direction_to_camera);
+	float rv = dot(r, v);
+	vec3 phong_specular = vec3(0.);
+	if (rv >= 0.) {
+		phong_specular = light.color*ms*pow(rv,mat.shininess);
+	}
+
+	vec3 h = normalize(l+v);
+	float nh = dot(n, h);
+	vec3 blinn_phong_specular = vec3(0.);
+	if (nh >= 0.) {
+		blinn_phong_specular = light.color*ms*pow(nh, mat.shininess);
+	}
+
 	/** #TODO RT2.2: 
 	- shoot a shadow ray from the intersection point to the light
 	- check whether it intersects an object from the scene
 	- update the lighting accordingly
 	*/
 
-	vec3 ms = mat.color*mat.specular;
 	vec3 specular = vec3(0.);
 	#if SHADING_MODE == SHADING_MODE_PHONG
-	vec3 r = normalize(2.*n*dot(n, l) - l);
-	vec3 v = normalize(direction_to_camera);
-	float rv = dot(r, v);
-	if (rv >= 0.) {
-		specular = light.color*ms*pow(rv,mat.shininess);
-	}
+	specular = phong_specular;
 	#endif
 
 	#if SHADING_MODE == SHADING_MODE_BLINN_PHONG
-	vec3 h = normalize(l+v);
-	float nh = dot(n, h);
-	if (nh >= 0.) {
-		specular = light.color*ms*pow(nh, mat.shininess);
-	}
+	specular = blinn_phong_specular;
 	#endif
 
 	return diffuse + specular;
@@ -464,11 +473,11 @@ vec3 render_light(vec3 ray_origin, vec3 ray_direction) {
 	int mat_id = 0;
 	if(ray_intersection(ray_origin, ray_direction, col_distance, col_normal, mat_id)) {
 		Material m = get_material(mat_id);
-		pix_color = light_color_ambient * m.color * m.ambient;
+		pix_color = light_color_ambient*m.color*m.ambient;
+
 		#if NUM_LIGHTS != 0
 		for(int i_light = 0; i_light < NUM_LIGHTS; i_light++) {
-		// // do something for each light lights[i_light]
-			pix_color += lighting(ray_origin + ray_direction*col_distance, col_normal, ray_direction, lights[i_light], m);
+			pix_color += lighting(ray_direction*col_distance, col_normal, -ray_direction, lights[i_light], m);
 		}
 		#endif
 	}
