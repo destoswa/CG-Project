@@ -388,7 +388,7 @@ vec3 lighting(
 
 	vec3 md = mat.color*mat.diffuse;
 	vec3 l = normalize(light.position-object_point);
-	vec3 n = normalize(object_normal);
+	vec3 n = object_normal;
 	float nl = dot(n, l);
 	vec3 diffuse = vec3(0.);
 	if (nl >= 0.) {
@@ -396,7 +396,7 @@ vec3 lighting(
 	}
 
 	vec3 ms = mat.color*mat.specular;
-	vec3 r = normalize(2.*n*dot(n, l) - l);
+	vec3 r = reflect(-l,n);
 	vec3 v = normalize(direction_to_camera);
 	float rv = dot(r, v);
 	vec3 phong_specular = vec3(0.);
@@ -426,7 +426,9 @@ vec3 lighting(
 	specular = blinn_phong_specular;
 	#endif
 
-	return diffuse + specular;
+	I = diffuse + specular
+
+	return I;
 }
 
 /*
