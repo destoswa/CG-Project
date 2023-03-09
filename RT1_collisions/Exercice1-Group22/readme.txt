@@ -17,7 +17,9 @@ Task RT1.2.1: Derive the expression for a Ray-Cylinder intersection
 
 Task RT1.2.2: Implement Ray-Cylinder intersections
 
-	From the expression derived in the previous task, we solve the quadratic formula for the cylinder like we 	did for the plane and derive up to two possible intersections. We make sure the intersections are on the 	cylinder by projecting them on the axis and making sure the distance between the cylinder center and 	projection is smaller than half the height of the cylinder, and save the smallest valid value of t. The 	normal is defined as the direction between the projection of the intersection point on the axis and the 	intersection point itself. The same treatment as with the plane is applied to the normal to make sure it's 	facing the right direction (solved an issue where the normal on the inner cylinder was facing the wrong 	way).
+	From the expression derived in the previous task, we solve the quadratic formula for the cylinder like we 	did for the plane and derive up to two possible intersections. We make sure the intersections are on the 	cylinder by projecting them on the axis and making sure the distance between the cylinder center and 	projection is smaller than half the height of the cylinder, and save the smallest valid value of t. The 	normal is defined as the direction between the projection of the intersection point on the axis and the 	intersection point itself. The same treatment as with the plane is applied to the normal to make sure it's 	facing the right direction (solved an issue where the normal on the inner cylinder was facing the wrong way).
+
+Note: An issue was detected in the barrel picture where the cylinder doesn't show. It has yet to be debugged.
 
 
 Custom scenes
