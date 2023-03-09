@@ -411,12 +411,6 @@ vec3 lighting(
 		blinn_phong_specular = light.color*ms*pow(nh, mat.shininess);
 	}
 
-	/** #TODO RT2.2: 
-	- shoot a shadow ray from the intersection point to the light
-	- check whether it intersects an object from the scene
-	- update the lighting accordingly
-	*/
-
 	vec3 specular = vec3(0.);
 	#if SHADING_MODE == SHADING_MODE_PHONG
 	specular = phong_specular;
@@ -426,7 +420,23 @@ vec3 lighting(
 	specular = blinn_phong_specular;
 	#endif
 
-	return diffuse + specular;
+	/** #TODO RT2.2: 
+	- shoot a shadow ray from the intersection point to the light
+	- check whether it intersects an object from the scene
+	- update the lighting accordingly
+	*/
+
+	float shadow = 1.;
+	float col_distance;
+	vec3 col_normal = vec3(0.);
+	int material_id = 0;
+	if (ray_intersection(object_point, light.position-object_point, col_distance, col_normal, material_id)) {
+		if (col_distance > 0.8) {
+			shadow = 0.;
+		}
+	}
+
+	return (diffuse + specular)*shadow;
 }
 
 /*
