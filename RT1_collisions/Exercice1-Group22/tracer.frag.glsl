@@ -255,10 +255,8 @@ bool ray_cylinder_intersection(
 		if (solutions[0] > 0.) {
 			ts[0] = solutions[0];
 		}
-		if(num_solutions == 2){
-			if (solutions[0] > 0.) {
-				ts[1] = solutions[1];
-			}
+		if(num_solutions == 2 && solutions[1] > 0.){
+			ts[1] = solutions[1];
 		}
 
 		vec3 projSol;
