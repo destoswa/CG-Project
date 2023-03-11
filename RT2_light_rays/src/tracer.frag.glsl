@@ -405,7 +405,7 @@ vec3 lighting(
 	}
 
 	vec3 h = normalize(l+v);
-	float nh = dot(n, h);
+	float nh = dot(n,h);
 	vec3 blinn_phong_specular = vec3(0.);
 	if (nh >= 0.) {
 		blinn_phong_specular = light.color*ms*pow(nh, mat.shininess);
@@ -430,8 +430,9 @@ vec3 lighting(
 	float col_distance;
 	vec3 col_normal = vec3(0.);
 	int material_id = 0;
-	if (ray_intersection(object_point, light.position-object_point, col_distance, col_normal, material_id)) {
-		if (col_distance > 0.8) {
+	vec3 light_to_obj = normalize(light.position-object_point);
+	if (ray_intersection(object_point, light_to_obj , col_distance, col_normal, material_id)) {
+		if (length(light.position-object_point) > col_distance) {
 			shadow = 0.;
 		}
 	}
@@ -487,7 +488,7 @@ vec3 render_light(vec3 ray_origin, vec3 ray_direction) {
 
 		#if NUM_LIGHTS != 0
 		for(int i_light = 0; i_light < NUM_LIGHTS; i_light++) {
-			pix_color += lighting(ray_direction*col_distance, col_normal, -ray_direction, lights[i_light], m);
+			pix_color += lighting(ray_origin + ray_direction*0.9999*col_distance, col_normal, -ray_direction, lights[i_light], m);
 		}
 		#endif
 	}
@@ -504,7 +505,7 @@ vec3 render_normals(vec3 ray_origin, vec3 ray_direction) {
 	vec3 col_normal = vec3(0.);
 	int mat_id = 0;
 
-	if( ray_intersection(ray_origin, ray_direction, col_distance, col_normal, mat_id) ) {	
+	if(ray_intersection(ray_origin, ray_direction, col_distance, col_normal, mat_id) ) {	
 		return 0.5*(col_normal + 1.0);
 	} else {
 		vec3 background_color = vec3(0., 0., 1.);
