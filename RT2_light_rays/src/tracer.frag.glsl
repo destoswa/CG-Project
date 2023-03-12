@@ -477,7 +477,8 @@ vec3 render_light(vec3 ray_origin, vec3 ray_direction) {
 	}
 	*/
 
-	vec3 pix_color = vec3(0.);
+	// ===== WITHOUT REFLECTION =====
+	/*vec3 pix_color = vec3(0.);
 
 	float col_distance;
 	vec3 col_normal = vec3(0.);
@@ -491,6 +492,33 @@ vec3 render_light(vec3 ray_origin, vec3 ray_direction) {
 			pix_color += lighting(ray_origin + ray_direction*0.9999*col_distance, col_normal, -ray_direction, lights[i_light], m);
 		}
 		#endif
+	}*/
+
+	// ===== WITH REFLECTION =====
+	vec3 pix_color  = vec3(0.);
+	float reflection_weight = 1.;
+
+	for(int i_reflection = 0; i_reflection < NUM_REFLECTIONS+1; i_reflection++) {
+		float col_distance;
+		vec3 col_normal = vec3(0.);
+		int mat_id = 0;
+		vec3 pix_color_ref = vec3(0.);
+		if(ray_intersection(ray_origin, ray_direction, col_distance, col_normal, mat_id)) {
+			Material m = get_material(mat_id);
+			pix_color_ref = light_color_ambient*m.color*m.ambient;
+			#if NUM_LIGHTS != 0
+				for(int i_light = 0; i_light < NUM_LIGHTS; i_light++) {
+					pix_color_ref += lighting(ray_origin + ray_direction*0.999*col_distance, col_normal, -ray_direction, lights[i_light], m);
+				}
+			#endif		
+			pix_color += (1. - m.mirror)*reflection_weight*pix_color_ref;
+			ray_origin = ray_origin + ray_direction * col_distance*0.999;
+			ray_direction = reflect(ray_direction,col_normal);
+			reflection_weight *= m.mirror ;
+		}
+		else{
+			break;
+		}
 	}
 
 	return pix_color;
