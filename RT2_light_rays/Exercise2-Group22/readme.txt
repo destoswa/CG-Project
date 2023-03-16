@@ -36,4 +36,6 @@ Task RT2.3.2: Implement reflections
 
 Contribution:
 
-Alice: 1/3	Jad: 1/3	Swann:1/3
+Alice Reymond: 1/3
+Jad Sobhie(287173): 1/3
+Swann Destouches:1/3
