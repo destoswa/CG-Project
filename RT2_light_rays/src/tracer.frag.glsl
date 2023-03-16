@@ -432,7 +432,7 @@ vec3 lighting(
 	int material_id = 0;
 	vec3 light_to_obj = normalize(light.position-object_point);
 	if (ray_intersection(object_point, light_to_obj , col_distance, col_normal, material_id)) {
-		if (length(light.position-object_point) > col_distance) {
+		if (length(light.position-object_point)-col_distance>1e-6) {
 			shadow = 0.;
 		}
 	}
@@ -508,11 +508,11 @@ vec3 render_light(vec3 ray_origin, vec3 ray_direction) {
 			pix_color_ref = light_color_ambient*m.color*m.ambient;
 			#if NUM_LIGHTS != 0
 				for(int i_light = 0; i_light < NUM_LIGHTS; i_light++) {
-					pix_color_ref += lighting(ray_origin + ray_direction*(col_distance-0.01), col_normal, -ray_direction, lights[i_light], m);
+					pix_color_ref += lighting(ray_origin + ray_direction*(col_distance-1e-2), col_normal, -ray_direction, lights[i_light], m);
 				}
 			#endif		
 			pix_color += (1. - m.mirror)*reflection_weight*pix_color_ref;
-			ray_origin = ray_origin + ray_direction * (col_distance-0.01);
+			ray_origin = ray_origin + ray_direction * (col_distance-1e-2);
 			ray_direction = reflect(ray_direction,col_normal);
 			reflection_weight *= m.mirror ;
 		}
