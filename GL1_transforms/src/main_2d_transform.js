@@ -8,24 +8,6 @@ import {deg_to_rad, mat4_to_string, vec_to_string, mat4_matmul_many} from "./icg
 
 
 async function main() {
-	/* let M_translation = mat4.fromTranslation(mat4.create(), [0, 10, 0]);
-	M_translation.toString()
-	console.log('transform : ', M_translation)
-
-	let M_rotation = mat4.fromZRotation(mat4.create(), 45 * Math.PI / 180);
-	M_rotation.toString()
-	console.log('rotation : ', M_rotation)
-
-	let M_RT = mat4_matmul_many(mat4.create(), M_translation, M_rotation);
-	M_RT.toString()
-	console.log('rot+trans : ', M_RT)
-
-	let M_TR = mat4_matmul_many(mat4.create(), M_rotation, M_translation);
-	console.log('trans+rot : ', M_TR)
-
-	console.log(mat4.getTranslation([0, 0, 0], M_RT))
-	console.log(mat4.getTranslation([0, 0, 0], M_TR)) */
-
 	/* `const` in JS means the variable will not be bound to a new value, but the value can be modified (if its an object or array)
 		https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/const
 	*/
@@ -97,6 +79,7 @@ async function main() {
 		void main() {
 			// #TODO GL1.1.1.1 Edit the vertex shader to apply mouse_offset translation to the vertex position.
 			// We have to return a vec4, because homogenous coordinates are being used.
+			
 			gl_Position = vec4(position + mouse_offset, 0, 1);
 		}`,
 			
@@ -224,13 +207,15 @@ async function main() {
 			You do not have to apply the mouse_offset to them.
 		*/
 		mat4.fromTranslation(mat_translation, [0.5, 0, 0]);
-		mat4.fromZRotation(mat_rotation, (sim_time * Math.PI * 30)/180);
+		mat4.fromZRotation(mat_rotation, sim_time * 30 * Math.PI / 180);
 		mat4.multiply(mat_transform, mat_rotation, mat_translation);
 		draw_triangle_with_transform({
 			mat_transform: mat_transform,
 			color: color_green,
 		});
 
+		mat4.fromTranslation(mat_translation, [0.5, 0, 0]);
+		mat4.fromZRotation(mat_rotation, sim_time * 30 * Math.PI / 180);
 		mat4.multiply(mat_transform, mat_translation, mat_rotation);
 		draw_triangle_with_transform({
 			mat_transform: mat_transform,
