@@ -193,6 +193,8 @@ export class SysRenderPlanetsUnshaded {
 				// Calculate mat_mvp: model-view-projection matrix	
 				//mat4_matmul_many(mat_mvp, ...)
 
+				mat4_matmul_many(mat_mvp,mat_projection,mat_view,actor.mat_model_to_world);
+
 				entries_to_draw.push({
 					mat_mvp: mat_mvp,
 					tex_base_color: this.resources[actor.texture_name],
