@@ -1,4 +1,5 @@
 import {vec2, vec3, vec4, mat3, mat4} from "../lib/gl-matrix_3.3.0/esm/index.js"
+import { lookAt } from "../lib/gl-matrix_3.3.0/esm/mat4.js"
 import {mat4_matmul_many} from "./icg_math.js"
 
 /*
@@ -108,21 +109,59 @@ export class SysOrbitalMovement {
 		
 		Scale the unit sphere to match the desired size
 			scale = actor.size
-			mat4.fromScaling takes a 3D vector!
+			mat4.fromScaling takes a 3D vector!g
 		*/
 
-		//const M_orbit = mat4.create();
+		const M_orbit = mat4.create();
+		//mat4.identity(M_orbit);
 
 		if(actor.orbit !== null) {
 			// Parent's translation
 			const parent = actors_by_name[actor.orbit]
+			
+			//console.log(parent.mat_model_to_world);
 			const parent_translation_v = mat4.getTranslation([0, 0, 0], parent.mat_model_to_world)
-
+			
 			// Orbit around the parent
-		} 
+
+			/*const look_at = mat4.lookAt(mat4.create(), 
+			parent_translation_v + [actor.orbit_radius, 0, 0],
+			[0, 0, 0],
+			[0, 0, 1]);
+			const rotation = mat4.fromZRotation(mat4.create(), sim_time * actor.orbit_speed + actor.orbit_phase);
+			*/
+			const angle = sim_time * actor.orbit_speed + actor.orbit_phase;
+			mat4_matmul_many(M_orbit,
+				mat4.fromZRotation(mat4.create(), angle),
+				mat4.fromTranslation(mat4.create(), parent_translation_v + [actor.orbit_radius*Math.sin(angle), actor.orbit_radius*Math.cos(angle),0]), 
+				);
+		}
+		if(actor.orbit !== null){
+			console.log("pas nulle!");
+			mat4_matmul_many(actor.mat_model_to_world,
+				M_orbit,
+				 mat4.fromZRotation(mat4.create(), sim_time * actor.rotation_speed),
+				  mat4.fromScaling(mat4.create(),[actor.size,actor.size,actor.size]),
+				  );
+			}
+			else{
+				console.log("nulle!!");
+				mat4_matmul_many(actor.mat_model_to_world,
+					 mat4.fromZRotation(mat4.create(), sim_time * actor.rotation_speed),
+					  mat4.fromScaling(mat4.create(),[actor.size,actor.size,actor.size]),
+					  );
+			}
+
+					
 		
 		// Store the combined transform in actor.mat_model_to_world
-		//mat4_matmul_many(actor.mat_model_to_world, ...);
+		//mat4_matmul_many(actor.mat_model_to_world, mat4.fromZRotation(mat4.create(), sim_time * actor.orbit_speed + actor.orbit_phase), mat4.scale(mat3.create(),actor.size));
+		/*if(actor.orbit !== null){
+			mat4_matmul_many(actor.mat_model_to_world, M_orbit, mat4.fromZRotation(mat4.create(), sim_time * actor.rotation_speed), mat4.fromScaling(mat4.create(),[actor.size,actor.size,actor.size]));
+		}
+		else{
+			mat4_matmul_many(actor.mat_model_to_world, mat4.fromZRotation(mat4.create(), sim_time * actor.rotation_speed), mat4.fromScaling(mat4.create(),[actor.size,actor.size,actor.size]));
+		}*/
 	}
 
 	simulate(scene_info) {
@@ -132,6 +171,7 @@ export class SysOrbitalMovement {
 		// Iterate over actors which have planet movement type
 		for(const actor of actors) {
 			if ( actor.movement_type === 'planet' ) {
+				console.log(actor.name)
 				this.calculate_model_matrix(actor, sim_time, actors_by_name)
 			}
 		}
@@ -191,7 +231,7 @@ export class SysRenderPlanetsUnshaded {
 
 				// #TODO GL1.2.1.2
 				// Calculate mat_mvp: model-view-projection matrix	
-				mat4_matmul_many(mat_mvp, frame_info.mat_projection, frame_info.mat_view,actor.mat_model_to_world)
+				mat4_matmul_many(mat_mvp, frame_info.mat_projection, frame_info.mat_view, actor.mat_model_to_world)
 
 				entries_to_draw.push({
 					mat_mvp: mat_mvp,
