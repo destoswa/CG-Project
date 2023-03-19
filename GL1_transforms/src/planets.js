@@ -131,9 +131,10 @@ export class SysOrbitalMovement {
 			const rotation = mat4.fromZRotation(mat4.create(), sim_time * actor.orbit_speed + actor.orbit_phase);
 			*/
 			const angle = sim_time * actor.orbit_speed + actor.orbit_phase;
+			const parentwise_translation = vec3.add([0,0,0], parent_translation_v, [actor.orbit_radius*Math.sin(angle), actor.orbit_radius*Math.cos(angle),0]);
 			mat4_matmul_many(M_orbit,
-				mat4.fromZRotation(mat4.create(), angle),
-				mat4.fromTranslation(mat4.create(), parent_translation_v + [actor.orbit_radius*Math.sin(angle), actor.orbit_radius*Math.cos(angle),0]), 
+				mat4.fromTranslation(mat4.create(), parentwise_translation), 
+				mat4.fromZRotation(mat4.create(), angle)
 				);
 		}
 		if(actor.orbit !== null){
