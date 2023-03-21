@@ -133,28 +133,23 @@ export class SysOrbitalMovement {
 			*/
 			const angle = sim_time * actor.orbit_speed + actor.orbit_phase;
 			const parentwise_translation = vec3.add([0,0,0], parent_translation_v, [actor.orbit_radius*Math.sin(angle), actor.orbit_radius*Math.cos(angle),0]);
-			//const parentwise_translation = parent_translation_v;
 			mat4_matmul_many(M_orbit,
-				//mat4.fromTranslation(mat4.create(), [actor.orbit_radius*Math.sin(angle), actor.orbit_radius*Math.cos(angle),0]), 
 				mat4.fromTranslation(mat4.create(), parentwise_translation), 
 				mat4.fromZRotation(mat4.create(), angle)
-				);
-		}
-		if(actor.orbit !== null){
-			console.log("pas nulle!");
+			);
+
 			mat4_matmul_many(actor.mat_model_to_world,
 				M_orbit,
-				 mat4.fromZRotation(mat4.create(), sim_time * actor.rotation_speed),
-				  mat4.fromScaling(mat4.create(),[actor.size,actor.size,actor.size]),
-				  );
-			}
-			else{
-				console.log("nulle!!");
-				mat4_matmul_many(actor.mat_model_to_world,
-					 mat4.fromZRotation(mat4.create(), sim_time * actor.rotation_speed),
-					  mat4.fromScaling(mat4.create(),[actor.size,actor.size,actor.size]),
-					  );
-			}
+				mat4.fromZRotation(mat4.create(), sim_time * actor.rotation_speed),
+				mat4.fromScaling(mat4.create(),[actor.size,actor.size,actor.size]),
+			);
+		}
+		else{
+			mat4_matmul_many(actor.mat_model_to_world,
+				mat4.fromZRotation(mat4.create(), sim_time * actor.rotation_speed),
+				mat4.fromScaling(mat4.create(),[actor.size,actor.size,actor.size]),
+		);
+		}
 
 					
 		
