@@ -113,24 +113,13 @@ export class SysOrbitalMovement {
 		*/
 
 		const M_orbit = mat4.create();
-		//mat4.identity(M_orbit);
 
 		if(actor.orbit !== null) {
 			// Parent's translation
 			const parent = actors_by_name[actor.orbit]
-			console.log(parent.orbit)
-			
-			//console.log(parent.mat_model_to_world);
 			const parent_translation_v = mat4.getTranslation([0, 0, 0], parent.mat_model_to_world)
 			
 			// Orbit around the parent
-
-			/*const look_at = mat4.lookAt(mat4.create(), 
-			parent_translation_v + [actor.orbit_radius, 0, 0],
-			[0, 0, 0],
-			[0, 0, 1]);
-			const rotation = mat4.fromZRotation(mat4.create(), sim_time * actor.orbit_speed + actor.orbit_phase);
-			*/
 			const angle = sim_time * actor.orbit_speed + actor.orbit_phase;
 			const parentwise_translation = vec3.add([0,0,0], parent_translation_v, [actor.orbit_radius*Math.sin(angle), actor.orbit_radius*Math.cos(angle),0]);
 			mat4_matmul_many(M_orbit,
@@ -138,6 +127,7 @@ export class SysOrbitalMovement {
 				mat4.fromZRotation(mat4.create(), angle)
 			);
 
+			// Store the combined transform (with orbit) in actor.mat_model_to_world
 			mat4_matmul_many(actor.mat_model_to_world,
 				M_orbit,
 				mat4.fromZRotation(mat4.create(), sim_time * actor.rotation_speed),
@@ -145,22 +135,12 @@ export class SysOrbitalMovement {
 			);
 		}
 		else{
+			// Store the combined transform (without orbit) in actor.mat_model_to_world
 			mat4_matmul_many(actor.mat_model_to_world,
 				mat4.fromZRotation(mat4.create(), sim_time * actor.rotation_speed),
 				mat4.fromScaling(mat4.create(),[actor.size,actor.size,actor.size]),
 		);
 		}
-
-					
-		
-		// Store the combined transform in actor.mat_model_to_world
-		//mat4_matmul_many(actor.mat_model_to_world, mat4.fromZRotation(mat4.create(), sim_time * actor.orbit_speed + actor.orbit_phase), mat4.scale(mat3.create(),actor.size));
-		/*if(actor.orbit !== null){
-			mat4_matmul_many(actor.mat_model_to_world, M_orbit, mat4.fromZRotation(mat4.create(), sim_time * actor.rotation_speed), mat4.fromScaling(mat4.create(),[actor.size,actor.size,actor.size]));
-		}
-		else{
-			mat4_matmul_many(actor.mat_model_to_world, mat4.fromZRotation(mat4.create(), sim_time * actor.rotation_speed), mat4.fromScaling(mat4.create(),[actor.size,actor.size,actor.size]));
-		}*/
 	}
 
 	simulate(scene_info) {

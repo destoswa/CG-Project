@@ -145,7 +145,6 @@ async function main() {
 			look_at, 
 			mat4.fromYRotation(mat4.create(), Math.PI + cam_angle_y), 
 			mat4.fromZRotation(mat4.create(), Math.PI/2 - cam_angle_z), 
-			//mat4.fromXRotation(mat4.create(),cam_angle_y)
 			) // edit this
 	}
 
