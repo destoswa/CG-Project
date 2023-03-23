@@ -27,11 +27,12 @@ function compute_triangle_normals_and_angle_weights(mesh) {
 		const vert3 = get_vert(mesh, mesh.faces[3*i_face + 2])
 		
 		// Modify the way triangle normals and angle_weights are computed
-		tri_normals.push(vec3.normalize(vec3.create(),vec3.cross(vec3.create(),vec3.subtract(vec3.create(),vert1,vert3),vec3.subtract(vec3.create(),vert1,vert2))))
+		tri_normals.push(vec3.normalize(vec3.create(),vec3.cross(vec3.create(),vec3.subtract(vec3.create(),vert3,vert2),vec3.subtract(vec3.create(),vert1,vert2))))
+		
 		angle_weights.push([
-			vec3.angle(vec3.create(), vec3.subtract(vec3.create(),vert2,vert1), vec3.subtract(vec3.create(),vert3,vert1)), 
-			vec3.angle(vec3.create(), vec3.subtract(vec3.create(),vert3,vert2), vec3.subtract(vec3.create(),vert1,vert2)), 
-			vec3.angle(vec3.create(), vec3.subtract(vec3.create(),vert2,vert3), vec3.subtract(vec3.create(),vert1,vert3)), 
+			vec3.angle(vec3.subtract(vec3.create(),vert2,vert1), vec3.subtract(vec3.create(),vert3,vert1)), 
+			vec3.angle(vec3.subtract(vec3.create(),vert3,vert2), vec3.subtract(vec3.create(),vert1,vert2)), 
+			vec3.angle(vec3.subtract(vec3.create(),vert2,vert3), vec3.subtract(vec3.create(),vert1,vert3))
 		])
 	}
 	return [tri_normals, angle_weights]
@@ -55,18 +56,21 @@ function compute_vertex_normals(mesh, tri_normals, angle_weights) {
 		const iv3 = mesh.faces[3*i_face + 2]
 
 		const normal = tri_normals[i_face]
-
+		//console.log(angle_weights[i_face])
 		// Add your code for adding the contribution of the current triangle to its vertices' normals
-		vec3.add(vertex_normals[iv1], vertex_normals[iv1], vec3.scale(vec3.create(), normal, angle_weights[i_face][0]))
-		vec3.add(vertex_normals[iv2], vertex_normals[iv2], vec3.scale(vec3.create(), normal, angle_weights[i_face][1]))
-		vec3.add(vertex_normals[iv3], vertex_normals[iv3], vec3.scale(vec3.create(), normal, angle_weights[i_face][2]))
+		vertex_normals[iv1] = vec3.add(vec3.create(), vertex_normals[iv1], vec3.scale(vec3.create(), normal, angle_weights[i_face][0]))
+		vertex_normals[iv2] = vec3.add(vec3.create(), vertex_normals[iv2], vec3.scale(vec3.create(), normal, angle_weights[i_face][1]))
+		vertex_normals[iv3] = vec3.add(vec3.create(), vertex_normals[iv3], vec3.scale(vec3.create(), normal, angle_weights[i_face][2]))
+		console.log(vertex_normals[iv1])
+		console.log(iv1)
+		console.log(normal)
 	}
 
 	for(let i_vertex = 0; i_vertex < num_vertices; i_vertex++) {
 		// Normalize the vertices
 		vertex_normals[i_vertex] = vec3.normalize(vec3.create(), vertex_normals[i_vertex])
 	}
-
+	//console.log(vertex_normals)
 	return vertex_normals
 }
 
