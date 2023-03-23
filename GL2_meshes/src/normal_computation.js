@@ -17,14 +17,10 @@ function compute_triangle_normals_and_angle_weights(mesh) {
 	Hint: you can use `vec3` specific methods such as `normalize()`, `add()`, `cross()`, `angle()`, or `subtract()`.
 		  The absolute value of a float is given by `Math.abs()`.
 	*/
-	const side1 = mesh.vert1 - mesh.vert2
-	const side2 = mesh.vert3 - mesh.vert2
-	const side3 = mesh.vert3 - mesh.vert1
-	//tri_normals = vec3.normalize([0.,0.,0.], tri_normals)
+
 	const num_faces     = (mesh.faces.length / 3) | 0
-	//tri_normals = vec3.normalize([0.,0.,0.], tri_normals)
-	const tri_normals = vec3.normalize([0., 0., 0.], vec3.cross([0.,0.,0.], side1,side2))
-	const angle_weights = [vec3.angle(side1,side3), vec3.angle(side1,side2), vec3.angle(side2,side3)]
+	const tri_normals   = []
+	const angle_weights = []
 	for(let i_face = 0; i_face < num_faces; i_face++) {
 		const vert1 = get_vert(mesh, mesh.faces[3*i_face + 0])
 		const vert2 = get_vert(mesh, mesh.faces[3*i_face + 1])
