@@ -196,13 +196,17 @@ async function main() {
 
 		// Example camera matrix, looking along forward-X, edit this
 		const look_at = mat4.lookAt(mat4.create(), 
-			[-5, 0, 0], // camera position in world coord
-			[0, 0, 0], // view target point
-			[0, 0, 1], // up vector
+			[-cam_distance_base*cam_distance_factor, 0., 0.],
+			[0., 0., 0.],
+			[0., 0., 1.],
 		)
 		// Store the combined transform in mat_turntable
 		// frame_info.mat_turntable = A * B * ...
-		mat4_matmul_many(frame_info.mat_turntable, look_at) // edit this
+		mat4_matmul_many(frame_info.mat_turntable, 
+			look_at, 
+			mat4.fromYRotation(mat4.create(), Math.PI + cam_angle_y), 
+			mat4.fromZRotation(mat4.create(), Math.PI/2 - cam_angle_z), 
+			) // edit this
 	}
 
 	update_cam_transform(frame_info)
