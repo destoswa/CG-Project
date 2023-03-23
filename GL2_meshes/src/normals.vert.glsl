@@ -8,7 +8,7 @@ attribute vec3 vertex_normal;
 	Pass the normal to the fragment shader. 
 	Create a vertex-to-fragment variable.
 */
-varying vec3 normal;
+varying vec3 normals;
 
 // Global variables specified in "uniforms" entry of the pipeline
 uniform mat4 mat_mvp;
@@ -22,11 +22,11 @@ void main() {
 		Assign your vertex-to-fragment varaiable.
 	*/
 
-	normal = vertex_normal;
+	normals = vertex_normal;
 
 	/* #TODO GL2.2.2
 		Transform the normals to camera space.
 	*/
-	normal = mat_normals_to_view*normal;
+	normals = mat_normals_to_view*normals;
 	gl_Position = mat_mvp * vec4(vertex_position, 1);
 }
