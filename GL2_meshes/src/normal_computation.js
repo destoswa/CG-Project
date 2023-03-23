@@ -30,8 +30,8 @@ function compute_triangle_normals_and_angle_weights(mesh) {
 		tri_normals.push(vec3.normalize(vec3.create(),vec3.cross(vec3.create(),vec3.subtract(vec3.create(),vert2,vert1),vec3.subtract(vec3.create(),vert3,vert1))))
 		angle_weights.push([
 			vec3.angle(vec3.create(), vec3.subtract(vec3.create(),vert2,vert1), vec3.subtract(vec3.create(),vert3,vert1)), 
-			vec3.angle(vec3.create(), vec3.subtract(vec3.create(),vert3,vert2), vec3.subtract(vec3.create(),vert2,vert1)), 
-			vec3.angle(vec3.create(), vec3.subtract(vec3.create(),vert3,vert2), vec3.subtract(vec3.create(),vert3,vert1)), 
+			vec3.angle(vec3.create(), vec3.subtract(vec3.create(),vert3,vert2), vec3.subtract(vec3.create(),vert1,vert2)), 
+			vec3.angle(vec3.create(), vec3.subtract(vec3.create(),vert2,vert3), vec3.subtract(vec3.create(),vert1,vert3)), 
 		])
 	}
 	return [tri_normals, angle_weights]
@@ -65,7 +65,7 @@ function compute_vertex_normals(mesh, tri_normals, angle_weights) {
 
 	for(let i_vertex = 0; i_vertex < num_vertices; i_vertex++) {
 		// Normalize the vertices
-		vec3.normalize(vertex_normals[i_vertex], vertex_normals[i_vertex])
+		vertex_normals[i_vertex] = vec3.normalize(vec3.create(), vertex_normals[i_vertex])
 	}
 
 	return vertex_normals
