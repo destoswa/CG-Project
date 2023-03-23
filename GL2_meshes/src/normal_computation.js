@@ -26,6 +26,7 @@ function compute_triangle_normals_and_angle_weights(mesh) {
 		const vert2 = get_vert(mesh, mesh.faces[3*i_face + 1])
 		const vert3 = get_vert(mesh, mesh.faces[3*i_face + 2])
 		
+		
 		// Modify the way triangle normals and angle_weights are computed
 		tri_normals.push(vec3.normalize(vec3.create(),vec3.cross(vec3.create(),vec3.subtract(vec3.create(),vert3,vert2),vec3.subtract(vec3.create(),vert1,vert2))))
 		
