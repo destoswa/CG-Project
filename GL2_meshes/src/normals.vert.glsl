@@ -27,6 +27,6 @@ void main() {
 	/* #TODO GL2.2.2
 		Transform the normals to camera space.
 	*/
-
+	normal = mat_normals_to_view*normal;
 	gl_Position = mat_mvp * vec4(vertex_position, 1);
 }
