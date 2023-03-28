@@ -9,6 +9,7 @@ attribute vec3 vertex_normal;
 	Create a vertex-to-fragment variable.
 */
 //varying ...
+varying vec3 Intensity;
 
 // Global variables specified in "uniforms" entry of the pipeline
 uniform mat4 mat_mvp;
@@ -30,5 +31,21 @@ void main() {
 	Hint: Compute the vertex position, normal and light_position in eye space.
 	Hint: Write the final vertex position to gl_Position
 	*/
+	//modifications:
+	//vec3 ma = material_color * material_ambient;
+	vec3 l = normalize(light_position - vertex_position);
+	vec3 n = normalize(vertex_normal);
+	vec3 v = normalize(vertex_position);
+	vec3 h = normalize(v+l);
+	Intensity = light_color * material_color * material_ambient;
+	if(dot(n,l) > 0.){
+		Intensity = Intensity + light_color * material_color * dot(n,l);
+		if(dot(n,h) > 0.){
+			Intensity = Intensity + light_color * material_color * dot(n,h);
+		}
+	}
+
+
+	//End of modification
 	gl_Position = mat_mvp * vec4(vertex_position, 1);
 }
