@@ -11,7 +11,7 @@ void main()
 	/* #TODO GL2.2.1
 	Visualize the normals as false color. 
 	*/
-	vec3 color = normals*0.5+0.5; // set the color from normals
+	vec3 color = normalize(normals)*0.5+0.5; // set the color from normals
 
 	gl_FragColor = vec4(color, 1.); // output: RGBA in 0..1 range
 }
