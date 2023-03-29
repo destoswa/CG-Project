@@ -44,8 +44,6 @@ void main() {
 			Intensity = Intensity + light_color * material_color * dot(n,h);
 		}
 	}
-
-
 	//End of modification
 	gl_Position = mat_mvp * vec4(vertex_position, 1);
 }
