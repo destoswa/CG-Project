@@ -10,9 +10,9 @@ attribute vec3 vertex_normal;
 	* lighting vector: direction to light
 	* view vector: direction to camera
 */
-//varying ...
-//varying ...
-//varying ...
+varying vec3 surface_normal;
+varying vec3 view_vector;
+varying vec3 light_vector;
 
 // Global variables specified in "uniforms" entry of the pipeline
 uniform mat4 mat_mvp;

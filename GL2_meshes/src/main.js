@@ -91,7 +91,7 @@ async function main() {
 	register_keyboard_action('p', () => is_paused = !is_paused);
 
 	// mode
-	let render_mode = 'Gouraud'
+	let render_mode = 'Phong'
 	create_choice_menu(
 		document.getElementById('menu-mode'),
 		['Normals', 'Gouraud', 'Phong'],
