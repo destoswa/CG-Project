@@ -26,6 +26,17 @@ void main()
 
 	Make sure to normalize values which may have been affected by interpolation!
 	*/
-	vec3 color = light_color;
+	vec3 l = normalize(light_vector);
+	vec3 n = normalize(surface_normal);
+	vec3 v = normalize(view_vector);
+	vec3 h = normalize(v+l);
+	vec3 Intensity = light_color * material_color * material_ambient;
+	if(dot(n,l) > 0.){
+		Intensity = Intensity + light_color * material_color * dot(n,l);
+		if(dot(n,h) > 0.){
+			Intensity = Intensity + light_color * material_color * pow(dot(n,h),material_shininess);
+		}
+	}
+	vec3 color = Intensity;
 	gl_FragColor = vec4(color, 1.); // output: RGBA in 0..1 range
 }
