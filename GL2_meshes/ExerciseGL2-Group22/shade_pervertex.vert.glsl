@@ -8,7 +8,6 @@ attribute vec3 vertex_normal;
 	Pass the values needed for per-pixel
 	Create a vertex-to-fragment variable.
 */
-//varying ...
 varying vec3 Intensity;
 
 // Global variables specified in "uniforms" entry of the pipeline
@@ -31,8 +30,6 @@ void main() {
 	Hint: Compute the vertex position, normal and light_position in eye space.
 	Hint: Write the final vertex position to gl_Position
 	*/
-	//modifications:
-	//vec3 ma = material_color * material_ambient;
 	vec3 l = normalize(light_position - (mat_model_view * vec4(vertex_position, 1.0)).xyz);
 	vec3 n = normalize(mat_normals_to_view * vertex_normal);
 	vec3 v = normalize(-(mat_model_view * vec4(vertex_position, 1.0)).xyz);
@@ -44,6 +41,6 @@ void main() {
 			Intensity = Intensity + light_color * material_color * pow(dot(n,h),material_shininess);
 		}
 	}
-	//End of modification
+
 	gl_Position = mat_mvp * vec4(vertex_position, 1);
 }
