@@ -9,8 +9,8 @@ attribute vec3 vertex_normal;
 	* surface normal
 	* view vector: direction to camera
 */
-//varying ...
-//varying ...
+varying vec3 v2f_normal;
+varying vec3 v2f_dir_to_camera;
 
 // Global variables specified in "uniforms" entry of the pipeline
 uniform mat4 mat_mvp;
@@ -32,6 +32,8 @@ void main() {
 	//v2f_dir_to_camera = vec3(1, 0, 0); // TODO calculate
 	// transform normal to camera coordinates
 	//v2f_normal = normal; // TODO apply normal transformation
+	v2f_normal = mat_normals_to_view * vertex_normal;
+	v2f_dir_to_camera = mat_normals_to_view * vertex_position;
 	
 	gl_Position = mat_mvp * vec4(vertex_position, 1);
 }
