@@ -256,10 +256,22 @@ export class SysRenderMeshesWithLight extends SysRenderMeshes {
 				func: '<=',
 			},
 
+
 			/* #TODO GL3.3.2
 				change the blend options
 			*/
 			blend: {
+				enable: true,
+    			func: {
+					srcRGB: 'src color',
+					srcAlpha: 1,
+					dstRGB: 'dst color',
+					dstAlpha: 1
+				},
+				equation: {
+				  rgb: 'add',
+				  alpha: 'add'
+				},
 			},
 			
 

@@ -1,9 +1,13 @@
 precision highp float;
 
-//varying ...
-//varying ...
+varying vec3 cam_surface_normal;
+varying vec3 cam_vertex_position;
 varying vec2 v2f_uv;
 
+// Global variables specified in "uniforms" entry of the pipeline
+uniform mat4 mat_mvp;
+uniform mat4 mat_model_view;
+uniform mat3 mat_normals_to_view;
 
 uniform vec3 light_position; // light position in camera coordinates
 uniform vec3 light_color;
@@ -18,7 +22,28 @@ void main() {
 	Sample texture tex_color at UV coordinates and display the resulting color.
 	*/
 	vec3 material_color = vec3(v2f_uv, 0.);
+	float material_ambient = 0.1;
+	vec3 l = normalize(light_position - cam_vertex_position);
+	vec3 n = normalize(cam_surface_normal);
+	vec3 v = normalize(-cam_vertex_position);
+	vec3 h = normalize(v+l);
 	
+	vec3 color = vec3(0.,0.,0.);
+	vec3 shadow_depth = textureCube(cube_shadowmap, cam_vertex_position).xyz;
+	if(length(cam_vertex_position) > length(shadow_depth)*1.01){
+		color = color + light_color * material_color * material_ambient;
+		if(dot(n,l) > 0.){
+			color = color + light_color * material_color * dot(n,l);
+			if(dot(n,h) > 0.){
+				color = color + light_color * material_color * pow(dot(n,h),material_shininess);
+			}
+		}
+	}
+	color /= (length(cam_vertex_position)*length(cam_vertex_position));
+	color = color + vec3(texture2D(tex_color, v2f_uv));
+	/*if(length(cam_vertex_position) > length(shadow_depth)*1.01){
+		color = vec3(0.,0.,0.);
+	}*/
 	/*
 	#TODO GL3.3.1: Blinn-Phong with shadows and attenuation
 
@@ -48,6 +73,6 @@ void main() {
 
 	Make sure to normalize values which may have been affected by interpolation!
 	*/
-	vec3 color = light_color * material_color;
+	//vec3 color = light_color * material_color;
 	gl_FragColor = vec4(color, 1.); // output: RGBA in 0..1 range
 }
