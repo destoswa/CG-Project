@@ -263,12 +263,8 @@ export class SysRenderMeshesWithLight extends SysRenderMeshes {
 			blend: {
 				enable: true,
     			func: {
-					src: 'src color',
-					dst: 'dst color',
-				},
-				equation: {
-				  rgb: 'add',
-				  alpha: 'add'
+					src: 'src alpha',
+					dst: 1
 				},
 			},
 			

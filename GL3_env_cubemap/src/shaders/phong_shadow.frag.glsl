@@ -35,14 +35,14 @@ void main() {
 	float distance = length(light_position - cam_vertex_position);
 
 	// Compute the shadow map value and scale the light color accordingly.
-	vec3 shadow_depth = textureCube(cube_shadowmap, cam_vertex_position).xyz;
+	float shadow_depth = textureCube(cube_shadowmap, cam_vertex_position - light_position).x;
 	float shadow = length(shadow_depth)*1.01 < distance ? 0. : 1.;
 
 	// Calculate the attenuation factor for the light.
 	float attenuation = 1. / (distance*distance);
 
 	// Compute the final color for the fragment.
-	vec3 color = material_color * (ambient * attenuation + light_color * attenuation * shadow * (diffuse + specular));
+	vec3 color = attenuation * material_color * light_color *(ambient + shadow * (diffuse + specular));
 
 	gl_FragColor = vec4(color, 1.0);
 }
