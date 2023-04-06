@@ -262,11 +262,11 @@ export class SysRenderMeshesWithLight extends SysRenderMeshes {
 			*/
 			blend: {
 				enable: true,
-    			func: {
-					src: 'src alpha',
-					dst: 1
+				func: {
+				  src: 'src alpha',
+				  dst: 'dst alpha',
 				},
-			},
+			  },
 			
 
 			vert: this.get_resource_checked(`${shader_name}.vert.glsl`),
