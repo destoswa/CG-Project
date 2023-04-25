@@ -28,7 +28,7 @@ body {
 
 h1, h2, h3, h4, h5, h6, a
 {
-	margin-top: 1rem;
+	margin-top: 7rem;
 	/* color: rgb(50, 90, 200); */
 	color: hsl(14, 84%, 37%);
 
@@ -116,6 +116,28 @@ figure.col3 {
 	display: grid;
 	grid-template-columns: 1fr 1fr 1fr;
 	grid-column-gap: 1rem;
+}
+
+
+img {
+    margin: auto;
+    width: 100%;
+    max-width: 280px;
+    max-height:100%
+}
+
+.column {
+  float: left;
+  flex: 33.33%;
+  padding: 5px;
+}
+
+/* Clear floats after image containers */
+.row::after {
+  content: "";
+  clear: both;
+  display: flex;
+  gap: 25px;
 }
 
 .sourceCode a {
@@ -207,7 +229,7 @@ figure.col3 {
 <body>
 
 <h1>Project Proposal - Group 22</h1>
-
+<p>Jad Sobhie, Swann Destouches, Alice Reymond</p>
 <ul>
 <li><a href="#project-overview">Project Overview</a></li>
 <li><a href="#goals_deliverables">Goals and Deliverables</a></li>
@@ -219,20 +241,84 @@ figure.col3 {
 <h2 id="project-overview">Project Overview</h2>
 
 <h3>Title</h3>
-<p>Descrption of the project.</p>
+<p>Our goal is to create a little medieval fantasy magic shop. The player, in first person view, can walk around the shop that displays spells or even potions. The spells are small exhibits of a variety of particle effect systems. The magic items could also be upgraded with implicit surfaces and bloom techniques.
+</p>
 
 <h3>Type of result</h3>
-<p>something</p>
+<p>Our project will be an interactive scene made on Unity (cf <a href="#resources">Resources</a>) that the viewer can walk around.</p>
 
 <h3>Concept Art</h3>
-<p></p>
+<p>Spells visual effect</p>
 
-<figure id="image_name" class="captioned">
-<img src="doc/some_image.jpg">
-<figcaption>
-some caption
-</figcaption>
-</figure>
+<div class="row">
+    <div class="column">
+        <img src="images/particle_effect1.jpeg">
+    </div>
+    <div class="column">
+        <img src="images/particle_effect2.jpeg">
+    </div>
+    <div class="column">
+        <img src="images/particle_effect3.jpeg">
+    </div>
+</div>
+<div class="row">
+    <div class="column">
+        <img src="images/particle_effect6.jpg">
+    </div>
+    <div class="column">
+        <img src="images/particle_effect4.jpg">
+    </div>
+    <div class="column">
+        <img src="images/particle_effect5.jpeg">
+    </div>
+</div>
+
+<img src="images/particle_effect3.jpg"
+    style="margin: auto;
+            width: 100%;
+            max-width: 100%;
+            max-height:100%">
+
+<p>Shop design concept</p>
+
+<div class="row">
+    <div class="column">
+        <img src="images/shop1.jpg">
+    </div>
+    <div class="column">
+        <img src="images/shop2.jpg">
+    </div>
+    <div class="column">
+        <img src="images/shop3.jpg">
+    </div>
+</div>
+<div class="row">
+    <div class="column">
+        <img src="images/shop4.jpg">
+    </div>
+    <div class="column">
+        <img src="images/shop5.jpg">
+    </div>
+</div>
+
+<p>Sketches for the shop's plan</p>
+
+<div class="row">
+    <div class="column">
+        <img src="images/sketch1.jpg">
+    </div>
+    <div class="column">
+        <img src="images/sketch2.jpg">
+    </div>
+    <div class="column">
+        <img src="images/sketch3.jpg">
+    </div>
+</div>
+<div class="row">
+    <div class="column">
+        <img src="images/sketch4.jpg">
+    </div>
+</div>
 
 <h2 id="goals_deliverables">Goals and Deliverables</h2>
 
