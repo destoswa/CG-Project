@@ -1,0 +1,11 @@
+particle effects theory:
+https://web.cs.wpi.edu/~matt/courses/cs563/talks/psys.html
+https://learn.unity.com/tutorial/introduction-to-particle-systems#
+
+videos:
+particle effect:
+https://www.youtube.com/watch?v=CjUMcBxEEAU
+https://www.youtube.com/watch?v=BiLW9qVsR-k
+
+polar bear:
+https://youtube.com/shorts/7a-da8tE2J0?feature=share
