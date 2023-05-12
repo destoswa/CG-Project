@@ -353,4 +353,54 @@ We are planning to use the following resources:
 	<li><b>Blender</b> will be used for the creation of the different assets</li>
 	<li><b>Unity</b> will be use for the support of the scene and physics of the camera</li>
 </ul>
+
+<h2 id="Milestone">Milestone Report</h2>
+<h3>What has been done</h3>
+<p>So far, we have been working mainly on two aspect of the project: The Particle effect and the motion of the camera in the scene:</p>
+<ul>
+	<li><b>Particle effect:</b> blalblabla</li>
+	<li><b>Motion of the camera :</b>
+	The idea regarding the motion of the camera is to be able to move freely in the scene, as if 
+	the camera is a physical client of the shop. Moreover, the user should be able to enter <i>in spectate mode</i> which turns off
+	the controls and make the camera travel automatically through the scene.<br>
+	The control of the camera have been implemented by attaching it to a texture-less object with a <i>First Person Controller</i>
+	script applied to the object. It can turn around and look up and down (body turns around (...) and camera goes up and down (...))
+	following the movement of the mouse and it can move around using the controls W-A-S-D.<br>
+	Regarding the path that the camera is supposed to follow, it has been made by creating a system of linked Bezier curves with 
+	a green target following it with a given speed (see video 1) and the user can then decide to follow the
+	target by pressing the <i>space</i> bar (see video 2 and 3). When the player do so, the green target is teleported to the nearest
+	position of the path to the player and a serie of attractive, rejecting and wind forces are applied to the player so that it follows
+	the target as smoothly as possible.
+	</li>
+<ul>
+<p></p>
+<video width="80%" controls>
+	<source src="video_creation_bezier.mp4" type="video/mp4">
+	Your brother does not support the video tag
+</video>
+<p>Video 1 : Demo of the creation of two Bezier curves and animation of the target running along the path.</p>
+
+<video width="80%" controls>
+	<source src="video_animation_cropped.mp4" type="video/mp4">
+	Your brother does not support the video tag
+</video>
+<p>Video 2 : Demo of the camera moving around and then turning into spectate mode. The left screen shows the scene and the right screen shows
+the view of the camera during the demo. On the left screen, the player is shown in white and the target in green.</p>
+
+<video width="80%" controls>
+	<source src="video_animation_zoom.mp4" type="video/mp4">
+	Your brother does not support the video tag
+</video>
+<p>Video 3 : Zoom on the scene of Video 2.</p>
+
+<h3>Update on the schedule</h3>
+As it can be seen, we have mostly been working on the particle effect and motions but the scene has been put aside. Since there
+is still some work to do on those aspect, we are going to split the work as following:
+<ul>
+	<li>Alice will continue working on the particle effect : ...details...</li>
+	<li>Swann will continue working on the motion of the camera: Smoothing the lookat motion, make the target appear to the smallest
+	location without having the rejecting force so strong that the player is rejected backward before bollowing the target. Implementing 
+	focus zones that are going to force the player to look at specific objects of interest when it is on spectate mode. </li>
+	<li>Jad is going to focus more on the creation of assets and the scene: ...details...</li>
+</ul>
 </body>
