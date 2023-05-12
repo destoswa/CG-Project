@@ -358,13 +358,14 @@ We are planning to use the following resources:
 <h3>What has been done</h3>
 <p>So far, we have been working mainly on two aspect of the project: The Particle effect and the motion of the camera in the scene:</p>
 <ul>
-	<li><b>Particle effect:</b> blalblabla</li>
+	<li><b>Particle effect:</b> The particles are GameObjects generated from a source with a few parameters regarding their
+	temporal and spatial evolution. Visually, each particle is made of a sprite. Until now, a first effect creating fire has been fine tuned.</li>
 	<li><b>Motion of the camera :</b>
 	The idea regarding the motion of the camera is to be able to move freely in the scene, as if 
 	the camera is a physical client of the shop. Moreover, the user should be able to enter <i>in spectate mode</i> which turns off
 	the controls and make the camera travel automatically through the scene.<br>
 	The control of the camera have been implemented by attaching it to a texture-less object with a <i>First Person Controller</i>
-	script applied to the object. It can turn around and look up and down (body turns around (...) and camera goes up and down (...))
+	script applied to the object. It can turn around and look up and down (body turns around (yaw) and camera goes up and down (pitch))
 	following the movement of the mouse and it can move around using the controls W-A-S-D.<br>
 	Regarding the path that the camera is supposed to follow, it has been made by creating a system of linked Bezier curves with 
 	a green target following it with a given speed (see video 1) and the user can then decide to follow the
@@ -397,10 +398,12 @@ the view of the camera during the demo. On the left screen, the player is shown 
 As it can be seen, we have mostly been working on the particle effect and motions but the scene has been put aside. Since there
 is still some work to do on those aspect, we are going to split the work as following:
 <ul>
-	<li>Alice will continue working on the particle effect : ...details...</li>
+	<li>Alice will continue working on the particle effect : Creating more effects (ice, lightning, ..) and implementing a glowing effect.</li>
 	<li>Swann will continue working on the motion of the camera: Smoothing the lookat motion, make the target appear to the smallest
 	location without having the rejecting force so strong that the player is rejected backward before bollowing the target. Implementing 
 	focus zones that are going to force the player to look at specific objects of interest when it is on spectate mode. </li>
-	<li>Jad is going to focus more on the creation of assets and the scene: ...details...</li>
+	<li>Jad is going to focus more on the creation of assets and the scene: Creating the scene on unity, using libraries of assets
+	and creating some of them on Blender (has the pedestral onwhich the effects will be shown).</li>
 </ul>
+Once Jad and Swann will have finish their part, they will also focus on the creation and fine-tuning of different particle effects.
 </body>
