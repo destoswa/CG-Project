@@ -1,0 +1,818 @@
+================================================================== 
+======================= MOUVEMENTS ===============================
+==================================================================
+
+
+===== FIRST PERSON CONTROLER =====
+ 
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class FPC : MonoBehaviour
+{
+    private Rigidbody rb;
+    public bool doControl = true;
+    #region Camera Movement Variables
+    public Camera playerCamera;
+    public float mouseSensitivity = 3f;
+    public float maxLookAngle = 90f;
+    //Internal Variables
+    private float yaw = 0.0f;
+    private float pitch = 0.0f;
+    #endregion
+
+    #region Movement
+    public float moveSpeed = 10f;
+    public float maxVelocityChange = 7f;
+    #endregion
+    
+    private Vector3 velPlayer;
+    
+    // Start is called before the first frame update
+    void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        rb = GetComponent<Rigidbody>();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if(doControl){
+            // Rotation
+            yaw = transform.localEulerAngles.y + Input.GetAxis("Mouse X") * mouseSensitivity;
+            pitch = pitch - Input.GetAxis("Mouse Y") * mouseSensitivity;
+            pitch = Mathf.Clamp(pitch, -maxLookAngle, maxLookAngle);
+            transform.localEulerAngles = new Vector3(0, yaw, 0);
+            playerCamera.transform.localEulerAngles = new Vector3(pitch, 0,0);
+        }
+    }
+
+    // FixedUpdate is called every fixed frame-rate frame (used for physics implementation)
+    private void FixedUpdate()
+    {
+        Vector3 targetVelocity = new Vector3(Input.GetAxis("Horizontal"),0,Input.GetAxis("Vertical"));
+        targetVelocity = transform.TransformDirection(targetVelocity) * moveSpeed;
+
+        // Apply the changes in velocity
+        Vector3 velocityChange = targetVelocity - rb.velocity;
+        velocityChange.x = Mathf.Clamp(velocityChange.x, -maxVelocityChange, maxVelocityChange);
+        velocityChange.z = Mathf.Clamp(velocityChange.z, -maxVelocityChange, maxVelocityChange);
+        velocityChange.y = 0;
+        rb.AddForce(velocityChange, ForceMode.VelocityChange);
+
+        // Gravity management
+        #region Gravity
+        Vector3 gravity = new Vector3(0,-9.81f,0);
+        float gravityMultiplayer = 10f;
+        gravity *= gravityMultiplayer;
+
+        if(rb.velocity.y < 0)
+        {
+            rb.AddForce(gravity, ForceMode.Force);
+        }
+        #endregion
+    }
+
+    // Collisions management
+    private void OnCollisionEnter(Collision collision)
+    {
+        print(collision.gameObject.name);
+        print(collision.transform.rotation.eulerAngles);
+        velPlayer = rb.velocity;
+        rb.angularVelocity = new Vector3(0,0,0);
+    }
+
+    // Avoid some perturbation effects on collisions with walls
+    private void OnCollisionExit(Collision collision)
+    {
+        print(collision.gameObject.name);
+        rb.angularVelocity = new Vector3(0,0,0);
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        if (collision.gameObject.layer == 6){
+            rb.angularVelocity = new Vector3(0,0,0);
+        }
+    }
+}
+
+
+===== lOOK AT TARGET =====
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class LookAtTarget : MonoBehaviour
+{
+    public GameObject Target;
+    public Camera playerCamera;
+    public float Speed = 1f;
+    public bool DoLookAt = false;
+
+    private Coroutine LookCoroutine;
+
+    
+    public void Update()
+    {
+        if(DoLookAt == true){
+            Quaternion lookRotation = Quaternion.LookRotation(Target.transform.position - transform.position);
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * Speed);
+            playerCamera.transform.rotation = Quaternion.Slerp(playerCamera.transform.rotation,transform.rotation, Time.deltaTime * Speed);
+        }
+    }
+}
+
+
+===== FOLLOW TARGET =====
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class FollowTarget : MonoBehaviour
+{
+    private Rigidbody rb;
+    private float aimSpeed;
+    public bool DoFollow = false;
+    public GameObject lookat;
+    public float Force = 2.5f;
+    public float coeff_repeal = 5.0f;
+    public float coeff_fluid = 1.0f;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+        aimSpeed = lookat.GetComponent<TargetFollowPath>().aimSpeed;
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        Vector3 deltaPos = lookat.transform.position - transform.position;
+        Vector3 speed = rb.velocity.normalized * Mathf.Pow(rb.velocity.magnitude,2);
+        float distance = deltaPos.magnitude;
+        Vector3 direction = deltaPos.normalized;
+
+        // Different forces applied to the player while following the target
+        Vector3 forceAttract = deltaPos * Force;
+        Vector3 forceRepeal = -direction / distance * coeff_repeal;
+        Vector3 forceFluid = -speed * coeff_fluid;
+        Vector3 forceApplied = forceAttract + forceRepeal + forceFluid;
+        forceApplied.y = 0f;
+        if(DoFollow){
+            rb.AddForce(forceApplied, ForceMode.Force);
+        }
+    }
+}
+
+
+===== CONTROL DURING GAME =====
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+
+public class ControlDuringGame : MonoBehaviour
+{
+    public ControlPoints controlpoints;
+    public GameObject lookat;
+    public Camera playerCamera;
+    private float aimSpeed;
+    private FollowTarget cinematic;
+    private FPC fpc;
+    private Rigidbody rb;
+    private LookAtTarget focusOn;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        cinematic = GetComponent<FollowTarget>();
+        rb = GetComponent<Rigidbody>();
+        aimSpeed = lookat.GetComponent<TargetFollowPath>().aimSpeed;
+        fpc = GetComponent<FPC>();
+        focusOn = GetComponent<LookAtTarget>();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (Input.GetKeyDown("space"))
+        {
+            if (cinematic.DoFollow == false)
+            {
+                // Bring Target close to the player
+                DragTargetBack();
+
+                // follow the target
+                cinematic.DoFollow = true;
+
+                // Look at target
+                focusOn.DoLookAt = true;
+            }
+            else
+            {
+                // Stop following the target
+                cinematic.DoFollow = false;
+                rb.velocity = new Vector3(0,0,0);
+                
+                // Enable First Person Controller
+                fpc.enabled = true;
+                focusOn.DoLookAt = false;
+            }
+        }
+    }
+
+    private void DragTargetBack()
+    {
+        // Disable first person controller and stop motion
+        fpc.enabled = false;
+        rb.velocity = new Vector3(0f, 0f, 0f);
+
+        // get all the positions on the path
+        List<Vector3> PathPoints = new List<Vector3>();
+        for (int i = 0; i < controlpoints.transform.childCount - 3; i = i + 3)
+        {
+            for (float t = 0; t <= 1; t += 0.01f)
+            {
+                Vector3 newPosition = Mathf.Pow(1 - t, 3) * controlpoints.transform.GetChild(i).position +
+                3 * Mathf.Pow(1 - t, 2) * t * controlpoints.transform.GetChild(i + 1).position +
+                3 * (1 - t) * Mathf.Pow(t, 2) * controlpoints.transform.GetChild(i + 2).position +
+                Mathf.Pow(t, 3) * controlpoints.transform.GetChild(i + 3).position;
+
+                PathPoints.Add(newPosition);
+            }
+        }
+
+        // Find closest position
+        float MinDist = (transform.position - PathPoints[0]).magnitude;
+        Vector3 MinPos = PathPoints[0];
+        foreach (Vector3 pos in PathPoints){
+            float dist = (transform.position - pos).magnitude;
+            if (dist < MinDist){
+                MinDist = dist;
+                MinPos = pos;
+            }
+        }
+
+        // Find Real position
+        float RealDist = MinDist;
+        Vector3 RealPos = MinPos;
+        float AimDistance = 4f;
+        for (int i = 0; i < PathPoints.Count; i++){
+            if (PathPoints[i] == RealPos){
+                float dist = (PathPoints[i] - transform.position).magnitude;
+                while(dist < AimDistance){
+                    dist = (PathPoints[i] - transform.position).magnitude;
+                    RealPos = PathPoints[i];
+                    RealDist = dist;
+                    i++;
+                    if (i == PathPoints.Count){i = 0;}
+                }
+                break;
+            }
+        }
+
+        // Find the parameters tparam and routeToGo corresponding to the closest position
+        int NewRouteToGo = 0;
+        float NewtParam = 0f;
+        for (int i = 0; i < controlpoints.transform.childCount - 3; i = i + 3)
+        {
+            for (float t = 0; t <= 1; t += 0.01f)
+            {
+                Vector3 newPosition = Mathf.Pow(1 - t, 3) * controlpoints.transform.GetChild(i).position +
+                3 * Mathf.Pow(1 - t, 2) * t * controlpoints.transform.GetChild(i + 1).position +
+                3 * (1 - t) * Mathf.Pow(t, 2) * controlpoints.transform.GetChild(i + 2).position +
+                Mathf.Pow(t, 3) * controlpoints.transform.GetChild(i + 3).position;
+
+                if (newPosition == RealPos){
+                    NewRouteToGo = i;
+                    NewtParam = t;
+                }
+            }
+        }
+
+        // Move the target
+        lookat.GetComponent<TargetFollowPath>().jump = true;
+        lookat.GetComponent<TargetFollowPath>().routeToGo = NewRouteToGo;
+        lookat.GetComponent<TargetFollowPath>().tParam = NewtParam;
+    }
+}
+
+
+================================================================== 
+======================= BEZIER CURVES ============================
+==================================================================
+
+===== CONTROL POINTS =====
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class ControlPoints : MonoBehaviour
+{
+
+    [Range(0f, 2f)]
+    [SerializeField] private float controllSize = 1f;
+
+    [Range(0f, 1f)]
+    [SerializeField] private float curveSize = 0.25f;
+
+    private Vector3 gizmosPosition;
+
+    private void OnDrawGizmos()
+    {
+        foreach(Transform t in transform)
+        {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawWireSphere(t.position, controllSize);
+        }
+        Color tmp = Color.gray;
+        tmp.a = 0.5f;
+        Gizmos.color = tmp;
+
+        // Loop on every child of the object
+        for (int i = 0; i < transform.childCount - 3; i = i + 3)
+        {
+            // For every pack of 3 children, build a Bezier curve using gizmos objects
+            for (float t = 0; t <= 1; t += 0.01f)
+            {
+                gizmosPosition = Mathf.Pow(1 - t, 3) * transform.GetChild(i).position +
+                3 * Mathf.Pow(1 - t, 2) * t * transform.GetChild(i + 1).position +
+                3 * (1 - t) * Mathf.Pow(t, 2) * transform.GetChild(i + 2).position +
+                Mathf.Pow(t, 3) * transform.GetChild(i + 3).position;
+                Gizmos.DrawSphere(gizmosPosition, curveSize);
+            }
+            Gizmos.DrawLine(transform.GetChild(i).position, transform.GetChild(i + 1).position);
+            Gizmos.DrawLine(transform.GetChild(i + 2).position, transform.GetChild(i + 3).position);
+        }
+
+    }
+}
+
+
+===== TARGET FOLLOW PATH =====
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class TargetFollowPath : MonoBehaviour
+{
+    public ControlPoints controlpoints;
+
+    public int routeToGo;
+
+    public float tParam;
+
+    private Vector3 playerPosition;
+
+    public float speedModifier = 0.5f;
+
+    public float aimSpeed = 20f;
+
+    public bool coroutineAllowed;
+
+    public bool jump = false;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        routeToGo = 0;
+        tParam = 0f;
+        coroutineAllowed = true;
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (coroutineAllowed)
+        {
+            StartCoroutine(GoByTheRoute(routeToGo));
+        }  
+    }
+
+    private IEnumerator GoByTheRoute(int routeNumber)
+    {
+        coroutineAllowed = false;
+
+        Vector3 p0 = controlpoints.transform.GetChild(routeNumber).position;
+        Vector3 p1= controlpoints.transform.GetChild(routeNumber + 1).position;
+        Vector3 p2 = controlpoints.transform.GetChild(routeNumber + 2).position;
+        Vector3 p3 = controlpoints.transform.GetChild(routeNumber + 3).position;
+
+        while (tParam < 1.0)
+        {
+            // Find the new position if the target jump to the nearest position from the player
+            if (jump){
+                p0 = controlpoints.transform.GetChild(routeToGo).position;
+                p1 = controlpoints.transform.GetChild(routeToGo + 1).position;
+                p2 = controlpoints.transform.GetChild(routeToGo + 2).position;
+                p3 = controlpoints.transform.GetChild(routeToGo + 3).position;
+                jump = false;
+            }
+               
+            float prevtParam = tParam;
+            tParam += Time.deltaTime * speedModifier;
+
+            // Compute a first time the next position
+            playerPosition = Mathf.Pow(1 - tParam, 3) * p0 +
+            3 * Mathf.Pow(1 - tParam, 2) * tParam * p1 +
+            3 * (1 - tParam) * Mathf.Pow(tParam, 2) * p2 +
+            Mathf.Pow(tParam, 3) * p3;
+
+            // Find the difference between the speed and the aimed speed and change tParam in order to keep the constant speed
+            float speed = (transform.position - playerPosition).magnitude / (Time.deltaTime * speedModifier);
+            float alpha = aimSpeed / speed;
+            tParam = prevtParam + (Time.deltaTime * speedModifier) * alpha;
+
+            // Recompute the next position
+            playerPosition = Mathf.Pow(1 - tParam, 3) * p0 +
+            3 * Mathf.Pow(1 - tParam, 2) * tParam * p1 +
+            3 * (1 - tParam) * Mathf.Pow(tParam, 2) * p2 +
+            Mathf.Pow(tParam, 3) * p3;
+            
+            Vector3 distance = (playerPosition - transform.position) / (playerPosition - transform.position).magnitude * 10;
+            transform.position = playerPosition;
+            yield return new WaitForEndOfFrame();
+        }
+
+        tParam = 0f;
+        routeToGo += 3;
+
+        if (routeToGo > controlpoints.transform.childCount - 3)
+        {
+            routeToGo = 0;
+        }
+
+        coroutineAllowed = true;
+    }
+}
+
+
+================================================================== 
+======================= FOCUS ZONES ==============================
+==================================================================
+
+
+===== FOCUS ZONE (APPLIED TO PLAYER) =====
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class FocusZone : MonoBehaviour
+{
+    public GameObject Target;
+    public float SpeedWhileFocus = 1.5f;
+    public float SpeedChangeOfSight = 1f;
+
+    private TargetFollowPath targetfollowpath;
+    private LookAtTarget lookattarget;
+    private GameObject oldTarget;
+    private float oldSpeed;
+    private float oldSpeedChangeOfSight;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        lookattarget = GetComponent<LookAtTarget>();
+        oldTarget = lookattarget.Target;
+        targetfollowpath = Target.GetComponent<TargetFollowPath>();
+        oldSpeed = targetfollowpath.aimSpeed;
+        oldSpeedChangeOfSight = lookattarget.Speed;
+    }
+
+    private void OnTriggerStay(Collider collider)
+    {
+        if (collider.gameObject.layer == 7 && collider.name == "FocusZonePlayer"){
+            // Change the object to look at (and the speed at which it turns if necessary)
+            lookattarget.Target = collider.transform.parent.GetChild(0).gameObject;
+            lookattarget.Speed = SpeedChangeOfSight;
+
+            // Change the speed of the target
+            targetfollowpath.aimSpeed = SpeedWhileFocus;
+        }
+    }
+
+    private void OnTriggerExit(Collider collider)
+    {
+        if (collider.gameObject.layer == 7 && collider.name == "FocusZonePlayer"){
+
+            // Reset the normal values
+            lookattarget.Target = oldTarget;
+            targetfollowpath.aimSpeed = oldSpeed;
+            lookattarget.Speed = oldSpeedChangeOfSight;
+        }
+    }
+}
+
+
+===== TARGET ENTER FOCUS ZONE =====
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class TargetEnterFocusZone : MonoBehaviour
+{
+    public float SpeedWhileFocus = 1.5f;
+    private TargetFollowPath followPath;
+    private float oldSpeed;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        followPath = GetComponent<TargetFollowPath>();
+        oldSpeed = followPath.aimSpeed;
+    }
+
+    private void OnTriggerStay(Collider collider)
+    {
+        if (collider.gameObject.layer == 7 && collider.name == "FocusZoneTarget"){
+            followPath.aimSpeed = SpeedWhileFocus;
+        }
+    }
+
+    private void OnTriggerExit(Collider collider)
+    {
+        if (collider.gameObject.layer == 7){
+            followPath.aimSpeed = oldSpeed;
+        }
+    }
+}
+
+
+================================================================== 
+======================= CAULDRON ===============================
+==================================================================
+
+
+===== CAULDRON SHADER =====
+
+Shader "Custom/CauldronShader"
+{
+    Properties
+    {
+        _Color ("Color", Color) = (1,1,1,1)
+        _MainTex ("Albedo (RGB)", 2D) = "white" {}
+        _Glossiness ("Smoothness", Range(0,1)) = 0.5
+        _Metallic ("Metallic", Range(0,1)) = 0.0
+        _Alpha ("Alpha", Range(0,1)) = 0.8
+        _Amplitude ("WaveSize", Range(0,1)) = 0.4
+        _Frequency ("WaveFrequency", Range(1,8)) = 2
+        _Speed("Speed", Range(-200,200)) = 100
+        _MaxRange("MaxRange",Range(-200,200)) = 1.0
+    }
+    SubShader
+    {
+        Tags {"RenderType"="Transparent"}
+
+        LOD 200
+
+        CGPROGRAM
+        // Physically based Standard lighting model, and enable shadows on all light types
+        #pragma surface surf Standard fullforwardshadows vertex:vert addshadow 
+
+        // Use shader model 3.0 target, to get nicer looking lighting
+        #pragma target 3.0
+
+        sampler2D _MainTex;
+
+        struct Input
+        {
+            float2 uv_MainTex;
+        };
+
+        half _Glossiness;
+        half _Metallic;
+        half _Alpha;
+        fixed4 _Color;
+        float _Amplitude;
+        float _Frequency;
+        float _Speed;
+        float _MaxRange;
+
+
+        // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
+        // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
+        // #pragma instancing_options assumeuniformscaling
+        UNITY_INSTANCING_BUFFER_START(Props)
+            // put more per-instance properties here
+        UNITY_INSTANCING_BUFFER_END(Props)
+        
+        // Modification of the origin vertex to make the animation
+        float Modification (float3 originVec){
+            float norm = length(originVec);
+            float3 modifiedPos = originVec;
+            float3 worldPos = mul(unity_ObjectToWorld, modifiedPos);
+            float3 objectOrigin = mul(unity_ObjectToWorld, float3(0,0,0));
+            float distance = sqrt(pow(worldPos.x - objectOrigin.x,2.0) + pow(worldPos.z - objectOrigin.z,2.0));
+            float3 worldPosRelCenter = worldPos - objectOrigin;
+            float r = sqrt(pow(worldPosRelCenter.x,2.0) + pow(worldPosRelCenter.z,2.0));
+            float phi = atan2(worldPosRelCenter.x,worldPosRelCenter.z);
+
+            // Different possible paterns that the surface can use (the parameters of the shader need to be adjusted for each displacement)
+            
+            //float4 displacement = (cos(_Frequency*(r + (_Speed * _Time)))) * (1 - distance/_MaxRange) * exp(1 + distance/_MaxRange);//Pos 1
+            //float4 displacement = (2*cos(_Frequency*(r + (0.1*_Speed * _Time))) + cos(_Frequency*(r + (_Speed * _Time)))) * (1 - distance/_MaxRange) * exp(1 + distance/_MaxRange);//Pos 2
+            float displacement = 0.001*_Amplitude*(cos(_Frequency*3*(r + (_Speed * _Time))) + cos(_Frequency*(phi*10 + (_Speed * _Time)))) * (1 - distance/_MaxRange) *exp(1 + distance/_MaxRange);    //Pos 3
+            //float4 displacement = (cos(_Frequency*r + phi + _Speed * _Time)) * (1 - distance/_MaxRange) *exp(1 + distance/_MaxRange);    //Pos 4
+            return displacement;
+        }
+
+        // New vertex shader
+        void vert(inout appdata_full data){
+            // Modification
+            float3 modifiedPos = data.vertex.xyz;
+            modifiedPos.z += Modification(modifiedPos);
+
+            // Modification of Tangent and Bitangent
+            float3 posPlusTangent = data.vertex.xyz + data.tangent * 0.01;
+            posPlusTangent.z = Modification(posPlusTangent);
+
+            float3 bitangent = cross(data.normal, data.tangent);
+            float3 posPlusBitangent = data.vertex.xyz + bitangent * 0.01;
+            posPlusBitangent.z = Modification(posPlusBitangent);
+
+            float3 modifiedTangent = posPlusTangent - modifiedPos;
+            float3 modifiedBiTangent = posPlusBitangent - modifiedPos;
+
+            //Modification of normal
+            float3 modifiedNormal = cross(modifiedTangent,modifiedBiTangent);
+
+            // Application of modification
+            data.normal = normalize(modifiedNormal);
+            data.vertex.xyz = modifiedPos + 0.0001;
+        }
+
+        void surf (Input IN, inout SurfaceOutputStandard o)
+        {
+            // Albedo comes from a texture tinted by color
+            fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
+            c.a = _Alpha;
+            o.Albedo = c.rgb;
+            // Metallic, transparency and smoothness come from slider variables
+            o.Metallic = _Metallic;
+            o.Smoothness = _Glossiness;
+            o.Alpha = c.a;
+        }
+        ENDCG
+    }
+    FallBack "Diffuse"
+}
+
+
+================================================================== 
+======================= LIGNTNING ================================
+==================================================================
+
+
+===== LIGHTNING EFFECT =====
+ 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class LightningEffect : MonoBehaviour
+{
+    public Material LightingMaterial;
+    public GameObject PreFab;
+    public GameObject particlePreFab;
+    [Range(1,10)]
+    public float Distance = 8f;
+    [Range(0.1f,5f)]
+    public float Frequence = 1f;
+    public float numLigthnings = 5f;
+    public int meanNumAngles = 10;
+    public float widenessOfLightning = 1.5f;
+    public float chancesOfSplit = 0.05f;
+
+
+    private List<ParticleSystemBehaviour> aliveSystems = new List<ParticleSystemBehaviour>();
+
+    
+    void Start()
+    {
+        StartCoroutine("ShowLines");
+    }
+
+
+    void Update()
+    {
+        aliveSystems.RemoveAll(system => system == null);
+        for (int i = 0; i < aliveSystems.Count; i++) {
+            ParticleSystemBehaviour system = aliveSystems[i];
+            system.Update();
+        }
+    }
+
+    private IEnumerator ShowLines(){
+        Vector3 center = transform.position;
+        float xDim = transform.localScale.x*5f;
+        float zDim = transform.localScale.z*5f;
+        while(true){
+
+            int randomNumLightings = (int) (numLigthnings*(1 + 0.5*UnityEngine.Random.Range(-1, 1))) ;
+            for(int i = 0; i < randomNumLightings; i++){
+                Vector3 pos = new Vector3(center.x + UnityEngine.Random.Range(-xDim, xDim), center.y,center.z + UnityEngine.Random.Range(-zDim, zDim));
+
+                //Creating gameObjects
+                GameObject go = new GameObject("Lightning_" + i.ToString());
+                go.transform.parent = this.transform;
+                LineRenderer lr = go.AddComponent(typeof(LineRenderer)) as LineRenderer;
+                lr.startWidth = 0.05f;
+                lr.endWidth = 0.05f;
+                lr.material = LightingMaterial;
+
+                // Show gameObject
+                StartCoroutine(Show(go, lr, pos));
+                yield return new WaitForSeconds(.1f);
+            }
+
+            float TimeToWait = 1/Frequence *(1f + 0.5f*UnityEngine.Random.Range(-1f, 1f));
+            yield return new WaitForSeconds( TimeToWait );
+        }
+    }
+
+
+    private IEnumerator Show(GameObject go,  LineRenderer lr, Vector3 pos){
+        SetUpLine(go, lr, pos,new Vector3(0f,1f,0f), meanNumAngles, chancesOfSplit, true);
+        yield return new WaitForSeconds(.2f);
+
+        // Destroy game object
+        GameObject.Destroy(go);
+    }
+
+    private void SetUpLine(GameObject go, LineRenderer lr, Vector3 pos, Vector3 dir, int numAngles, float chancesSplit, bool toGround=false){
+        // Number of angles
+        int numAnglesRand = (int)UnityEngine.Random.Range(numAngles * 0.8f, numAngles *1.2f);
+        lr.positionCount = numAnglesRand + 2;
+
+        // Creating positions
+            float[] Positions = new float[numAnglesRand];
+            float dist = 0f;
+            if(toGround){
+                dist = Distance;
+            }
+            else{
+                dist = (Distance - (transform.position.y - pos.y)) * (0.4f + UnityEngine.Random.Range(-0.1f, 0.1f));
+            }
+
+            for(int i = 0; i < numAnglesRand; i++){
+                Positions[i] = UnityEngine.Random.Range(0, dist);
+            }
+            
+            Array.Sort(Positions);
+            
+            
+
+        // Creating lines
+
+        // Creating first segment
+        lr.SetPosition(0,pos);
+
+        // Creating the n-2 next segments
+        for(int i = 0; i< numAnglesRand; i++){
+            Vector3 perpVec1 = Vector3.Normalize(Vector3.Cross(dir, new Vector3(1f,1f,1f))) * UnityEngine.Random.Range(-widenessOfLightning/2, widenessOfLightning/2);
+            Vector3 perpVec2 = Vector3.Normalize(Vector3.Cross(dir, perpVec1)) * UnityEngine.Random.Range(-widenessOfLightning/2, widenessOfLightning/2);
+            Vector3 posAngle = pos - dir * Positions[i] + perpVec1 + perpVec2;
+            lr.SetPosition(i+1,posAngle);
+            
+            // Add child
+            if(UnityEngine.Random.value < chancesOfSplit && i >= numAnglesRand/4 && i <= 3*numAnglesRand/4){
+                GameObject goChild = new GameObject("Lightning_" + i.ToString());
+                goChild.transform.parent = go.transform;
+                LineRenderer lrChild = goChild.AddComponent(typeof(LineRenderer)) as LineRenderer;
+                lrChild.startWidth = 0.05f;
+                lrChild.endWidth = 0.05f;
+                lrChild.material = LightingMaterial;
+
+                // Find new direction
+                Vector3 vec1 = Vector3.Cross(dir, new Vector3(1f,1f,1f));
+                Vector3 NewDir = Vector3.Normalize(Vector3.Cross(dir, vec1));
+                SetUpLine(goChild, lrChild, posAngle, NewDir, (int)numAngles/3, chancesOfSplit*0.5f);
+            }
+        }
+
+        // Creating last segment (on the ground)
+        Vector3 perpVecLast1 = Vector3.Normalize(Vector3.Cross(dir, new Vector3(1f,1f,1f))) * UnityEngine.Random.Range(-widenessOfLightning/2, widenessOfLightning/2);
+        Vector3 perpVecLast2 = Vector3.Normalize(Vector3.Cross(dir, perpVecLast1)) * UnityEngine.Random.Range(-widenessOfLightning/2, widenessOfLightning/2);
+        lr.SetPosition(numAnglesRand+1, pos - dir * dist + perpVecLast1 + perpVecLast2);
+        
+        //Create Ground effect
+        if (toGround){
+            ParticleSystemBehaviour newSystem = Instantiate(PreFab, lr.GetPosition(numAnglesRand +1) , Quaternion.identity, go.transform).GetComponent<ParticleSystemBehaviour>();
+            newSystem.Initialize(lr.GetPosition(numAnglesRand +1), particlePreFab);
+            aliveSystems.Add(newSystem);
+        }
+    }
+
+}
