@@ -38,9 +38,14 @@ h3, h4, h5, h6 {
 	font-weight: normal;
 }
 
-p, ul {
+p{
 	margin-left: 2em;
 	margin-right: 1.5em;
+	margin-top:	0.3em;
+}
+
+ul{
+	margin-left : 1em;
 	margin-top:	0.3em;
 }
 
@@ -253,13 +258,20 @@ img {
 	</li>
 	<li><a href="#results">Results</a>
 		<ul>
-			<li><a href="#res_movement">Movement</a></li>
+			<li><a href="#res_movement">Movement</a>
+				<ul>
+					<li><a href="res_FPC">First Person Controller</a></li>
+					<li><a href="res_BezierCurves">Bezier curves</a></li>
+					<li><a href="res_FocusZones">Focus zones</a></li>
+				</ul>
+			</li>
 			<li><a href="#res_particleeffect">Particle effects</a></li>
 			<li><a href="#res_shader">Shader</a></li>
 			<li><a href="#res_lightning">Lightning</a></li>
 			<li><a href="#res_scene">Scene</a></li>
 		</ul>
 	</li>
+	<li id="conclusion">Discussion and conclusion</li>
 	<li><a href="#references">References</a></li>
 
 </ul>
@@ -271,7 +283,7 @@ img {
 <h2 id="techapproach">Technical approach</h2>
 <h3 id="ta_movement">Movement</h3>
 <p>Regarding the movement, the idea is to allow the player to explore the hut at her/his own rate or to let go of the command, sit back and enjoy a confortable preset ride.</p>
-<h4 id="ta_FPC">First Person Controller:</h4>
+<h4 id="ta_FPC">First Person Controller</h4>
 <p>
 	The idea regarding the motion of the camera is to be able to move freely in the scene, as if 
 	the camera is a physical client of the shop. Moreover, the user should be able to enter <i>in spectate mode</i> which turns off
@@ -281,7 +293,7 @@ img {
 	following the movement of the mouse and it can move around using the controls W-A-S-D.<br>
 </p>
 
-<h4 id="ta_BezierCurves">Bezier curves :</h4>
+<h4 id="ta_BezierCurves">Bezier curves</h4>
 <p>
 	Regarding the path that the camera is supposed to follow, it has been made by creating a system of linked Bezier curves with 
 	an invisible target following it with a given speed (see video 1) and the user can then decide to follow the
@@ -292,7 +304,9 @@ img {
 
 <h4 id="ta_FocusZones">Focus zones</h4>
 <p>
-
+	In order for the player to look at objects of interest during the traveling along the bezier curves, focuse zones where implemented. Those zones
+	consist in invisible cubes with a colider that is trigger when the player and the target enter them. The effect is to change the object onwhich
+	the Player focus and the speed of the target can also be changed.
 </p>
 
 <h3 id="ta_particleeffect">Particle effect</h3>
@@ -304,36 +318,50 @@ the center of the surface and set to vary in time, following sinusoids-like func
 <h3 id="ta_lightning">Lightning</h3>
 <p>The lightning effect was done by creating a script that construct lightning object. Each of those objects consist in a set of segments of random sizes, having random angles between them and a
 probability to branch on a new subset of lines. The generation of lightning is also randomized around a fixed a value. In order to make the lightning bloom, the <i>Post Processing</i> package of 
-unity is used in order to apply blooming effect an emitive texture that is set to each lightning object.
+unity is used in order to apply blooming effect to an emitive texture that is set to each lightning object.
 </p>
 <h3 id="ta_scene">Scene</h3>
 
 <h2 id="results">Results</h2>
-<h3>Movement</h3>
-<video width="80%" controls>
-	<source src="video_creation_bezier.mp4" type="video/mp4">
-	Your brother does not support the video tag
-</video>
-<p>Video 1 : Demo of the creation of two Bezier curves and animation of the target running along the path.</p>
+<h3 id="res_movement">Movement</h3>
+<h4 id="res_FPC">First Person Controller</h4>
+<h4 id="res_BezierCurves">Bezier curves</h4>
+	<p>The Bezier curve setting process can be seen on video 1. As it can be seen, the implementation of the script as been made so that once it is
+	applied to the parent object, the rendering of the curve is set automatically while the user create new points of control.</p>
+	<center><video width="80%" controls>
+		<source src="video_creation_bezier.mp4" type="video/mp4">
+		Your brother does not support the video tag
+	</video></center>
+	<p>Video 1 : Demo of the creation of two Bezier curves and animation of the target running along the path.</p>
 
-<video width="80%" controls>
-	<source src="video_animation_cropped.mp4" type="video/mp4">
-	Your brother does not support the video tag
-</video>
-<p>Video 2 : Demo of the camera moving around and then turning into spectate mode. The left screen shows the scene and the right screen shows
-the view of the camera during the demo. On the left screen, the player is shown in white and the target in green.</p>
+	<p>The videos 2 and 3 show how the transition from FPC to spectate mode. In the video 3, we can see that the target is independant from the player
+	until the space bar is pressed. When the spectate mode is activated, the target will be teleported to the closest position from the player on the
+	bezier curve and the set of forces that make the player follow it is enabled.</p>
+	<center><video width="80%" controls>
+		<source src="video_animation_cropped.mp4" type="video/mp4">
+		Your brother does not support the video tag
+	</video></center>
+	<p>Video 2 : Demo of the camera moving around and then turning into spectate mode. The left screen shows the scene and the right screen shows
+	the view of the camera during the demo. On the left screen, the player is shown in white and the target in green.</p>
 
-<video width="80%" controls>
-	<source src="video_animation_zoom.mp4" type="video/mp4">
-	Your brother does not support the video tag
-</video>
-<p>Video 3 : Zoom on the scene of Video 2.</p>
+	<center><video width="80%" controls>
+		<source src="video_animation_zoom.mp4" type="video/mp4">
+		Your brother does not support the video tag
+	</video></center>
+	<p>Video 3 : Zoom on the scene of Video 2.</p>
+
+<h4 id="res_FocusZones">Focus zones</h4>
 <h3 id="res_particleeffect">Particle effect</h3>
 <h3 id="res_shader">Shader</h3>
 <h3 id="res_lightning">Lightning</h3>
 <h3 id="res_scene">Scene</h3>
-
+<h2 id="conclusion">Discussion and conclusion</h2>
 <h2 id="references">References</h2>
+<ul>
+	<li></li>
+	<li></li>
+	<li></li>
+</ul>
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
