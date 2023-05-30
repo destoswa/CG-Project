@@ -39,15 +39,19 @@ h3, h4, h5, h6 {
 }
 
 p, ul {
-	margin-left: 1.5em;
+	margin-left: 2em;
 	margin-right: 1.5em;
+	margin-top:	0em;
 }
 
 h3, h4, h5, h6 { 
 	margin-left: 1em;
+	margin-bottom:	0em;
 }
 
-h3 {}
+h4 {
+	margin-left: 1.7em;
+}
 
 ul {
 	padding-left: 1.5em;
@@ -234,7 +238,13 @@ img {
 	<li><a href="#abstract">Abstract</a></li>
 	<li><a href="#techapproach">Technical approach</a>
 		<ul>
-			<li><a href="#ta_movement">Movement</a></li>
+			<li><a href="#ta_movement">Movement</a>
+				<ul>
+					<li><a href="ta_FPC">First Person Controller</a></li>
+					<li><a href="ta_BezierCurves">Bezier curves</a></li>
+					<li><a href="ta_FocusZones">Focus zones</a></li>
+				</ul>
+			</li>
 			<li><a href="#ta_particleeffect">Particle effects</a></li>
 			<li><a href="#ta_shader">Shader</a></li>
 			<li><a href="#ta_lightning">Lightning</a></li>
@@ -261,7 +271,8 @@ img {
 <h2 id="techapproach">Technical approach</h2>
 <h3 id="ta_movement">Movement</h3>
 <p>Regarding the movement, the idea is to allow the player to explore the hut at her/his own rate or to let go of the command, sit back and enjoy a confortable preset ride.</p>
-<p><b>First Person Controller:</b>
+<h4 id="ta_FPC">First Person Controller:</h4>
+<p>
 	The idea regarding the motion of the camera is to be able to move freely in the scene, as if 
 	the camera is a physical client of the shop. Moreover, the user should be able to enter <i>in spectate mode</i> which turns off
 	the controls and make the camera travel automatically through the scene.<br>
@@ -269,12 +280,19 @@ img {
 	script applied to the object. It can turn around and look up and down (body turns around (yaw) and camera goes up and down (pitch))
 	following the movement of the mouse and it can move around using the controls W-A-S-D.<br>
 </p>
-<p><b>Bezier curves :</b>
+
+<h4 id="ta_BezierCurves">Bezier curves :</h4>
+<p>
 	Regarding the path that the camera is supposed to follow, it has been made by creating a system of linked Bezier curves with 
 	an invisible target following it with a given speed (see video 1) and the user can then decide to follow the
 	target by pressing the <i>space</i> bar (see video 2 and 3). When the player do so, the green target is teleported to the nearest
 	position of the path to the player and a serie of attractive, rejecting and wind forces are applied to the player so that it follows
 	the target as smoothly as possible.
+</p>
+
+<h4 id="ta_FocusZones">Focus zones</h4>
+<p>
+
 </p>
 
 <h3 id="ta_particleeffect">Particle effect</h3>
