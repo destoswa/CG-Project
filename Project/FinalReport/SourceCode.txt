@@ -823,7 +823,533 @@ public class LightningEffect : MonoBehaviour
 
 
 ===== PARTICLE SYSTEM =====
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class ParticleSystemBehaviour : MonoBehaviour
+{
+    public GameObject particlePrefab;
+    public float frequency;
+    public enum InitShape {
+        Point,
+        Rectangle,
+        Cube
+    } 
+    public InitShape initShape;
+    // point
+    public Vector3 initPos;
+    // rectangle
+    public float width;
+    public float length;
+    private Vector3 leftDownCorner;
+    private Vector3 rightDownCorner;
+    private Vector3 leftUpCorner;
+    private Vector3 rightUpCorner;
+    // cube
+    public float sizeX;
+    public float sizeY;
+    public float sizeZ;
+    private Vector3[] coordinates = new Vector3[8];
+
+    public bool firework;
+    public int minLines;
+    public int maxLines;
+    private Vector3[] directions;
+    public bool shouldTimeout;
+    public float timeout;
+    private float timer = 0f;
+    private float frequency_timer = 0f;
+    private ParticleBehaviour createParticle(Vector3 position, Vector3 velocity) {
+        ParticleBehaviour newParticle = Instantiate(particlePrefab, position, Quaternion.identity).GetComponent<ParticleBehaviour>();
+        newParticle.Initialize(position, velocity);
+        return newParticle;
+    }
+
+    public void Initialize(Vector3 position, GameObject particle) {
+        this.initPos = position;
+        this.particlePrefab = particle;
+    }
+
+    private List<ParticleBehaviour> aliveParticles = new List<ParticleBehaviour>();
+    // Start is called before the first frame update
+    void Start()
+    {
+        frequency *= 0.0000001f;
+        if (firework) {
+            int nbLines = Random.Range(minLines, maxLines);
+            directions = new Vector3[nbLines];
+            for (int i = 0; i<nbLines; i++) {
+                directions[i] = Random.insideUnitSphere;
+            }
+        }
+
+        switch (initShape) {
+            case InitShape.Point:
+                break;
+            case InitShape.Rectangle:
+                leftDownCorner = new Vector3(transform.position.x - length, transform.position.y, transform.position.z - width);
+                rightDownCorner = new Vector3(transform.position.x + length, transform.position.y, transform.position.z - width);
+                rightUpCorner = new Vector3(transform.position.x + length, transform.position.y, transform.position.z + width);
+                leftUpCorner = new Vector3(transform.position.x - length, transform.position.y, transform.position.z + width);
+                break;
+            case InitShape.Cube:
+                coordinates[0] = new Vector3(transform.position.x - sizeX, transform.position.y - sizeY, transform.position.z - sizeZ);
+                coordinates[1] = new Vector3(transform.position.x + sizeX, transform.position.y - sizeY, transform.position.z - sizeZ);
+                coordinates[2] = new Vector3(transform.position.x + sizeX, transform.position.y - sizeY, transform.position.z + sizeZ);
+                coordinates[3] = new Vector3(transform.position.x - sizeX, transform.position.y - sizeY, transform.position.z + sizeZ);
+                coordinates[4] = new Vector3(transform.position.x - sizeX, transform.position.y + sizeY, transform.position.z - sizeZ);
+                coordinates[5] = new Vector3(transform.position.x + sizeX, transform.position.y + sizeY, transform.position.z - sizeZ);
+                coordinates[6] = new Vector3(transform.position.x + sizeX, transform.position.y + sizeY, transform.position.z + sizeZ);
+                coordinates[7] = new Vector3(transform.position.x - sizeX, transform.position.y + sizeY, transform.position.z + sizeZ);
+                break;
+        }
+    }
+    // Update is called once per frame
+    public void Update()
+    {
+        if (shouldTimeout) timer += Time.deltaTime;
+        frequency_timer += Time.deltaTime;
+        if (frequency_timer >= frequency) {
+            if (firework & timer < timeout) {
+                for (int i = 0; i<directions.Length; i++) {
+                    spawnNewParticle(directions[i]);
+                }
+            }
+            else if (shouldTimeout & timer >= timeout) {
+                Destroy(gameObject);
+            }
+            else spawnNewParticle(Vector3.zero);
+            frequency_timer = 0f;
+        }
+        removeDeadParticles();
+        updateAliveParticles();
+    }
+
+     private void removeDeadParticles() {
+        aliveParticles.RemoveAll(particle => particle == null);
+    }
+
+    private void updateAliveParticles() {
+        for (int i = 0; i < aliveParticles.Count; i++)
+        {
+            ParticleBehaviour particle = aliveParticles[i];
+            particle.Update();
+            updateParticleBlend(particle);
+        }
+    }
+
+    private void spawnNewParticle(Vector3 velocity) {
+        ParticleBehaviour newParticle = null;
+        switch (initShape) {
+            case InitShape.Point:
+                newParticle = createParticle(initPos, velocity);
+                break;
+            case InitShape.Rectangle:
+                Vector3 normal = Vector3.Cross(rightDownCorner - leftDownCorner, leftUpCorner - leftDownCorner).normalized;
+                float length = Random.Range(0f, 1f);
+                float height = Random.Range(0f, 1f);
+                Vector3 randomPos = leftDownCorner + length * (rightDownCorner - leftDownCorner) + height * (leftUpCorner - leftDownCorner);
+                newParticle = createParticle(randomPos, velocity);
+                break;
+            case InitShape.Cube:
+                // Calculate the minimum and maximum bounds for each axis
+                float minX = Mathf.Min(coordinates[0].x, coordinates[1].x, coordinates[2].x, coordinates[3].x, coordinates[4].x, coordinates[5].x, coordinates[6].x, coordinates[7].x);
+                float maxX = Mathf.Max(coordinates[0].x, coordinates[1].x, coordinates[2].x, coordinates[3].x, coordinates[4].x, coordinates[5].x, coordinates[6].x, coordinates[7].x);
+                float minY = Mathf.Min(coordinates[0].y, coordinates[1].y, coordinates[2].y, coordinates[3].y, coordinates[4].y, coordinates[5].y, coordinates[6].y, coordinates[7].y);
+                float maxY = Mathf.Max(coordinates[0].y, coordinates[1].y, coordinates[2].y, coordinates[3].y, coordinates[4].y, coordinates[5].y, coordinates[6].y, coordinates[7].y);
+                float minZ = Mathf.Min(coordinates[0].z, coordinates[1].z, coordinates[2].z, coordinates[3].z, coordinates[4].z, coordinates[5].z, coordinates[6].z, coordinates[7].z);
+                float maxZ = Mathf.Max(coordinates[0].z, coordinates[1].z, coordinates[2].z, coordinates[3].z, coordinates[4].z, coordinates[5].z, coordinates[6].z, coordinates[7].z);
+
+                // Generate random values within the range of each axis
+                float randomX = Random.Range(minX, maxX);
+                float randomY = Random.Range(minY, maxY);
+                float randomZ = Random.Range(minZ, maxZ);
+
+                // Construct a new point using the generated random values
+                Vector3 randomPoint = new Vector3(randomX, randomY, randomZ);
+
+                newParticle = createParticle(randomPoint, velocity);
+                break;
+
+        }
+        aliveParticles.Add(newParticle);
+    }
+
+    private void updateParticleBlend(ParticleBehaviour particle) {
+        if (aliveParticles.Count < 2) return;
+
+        float blendDistance = particle.radius;
+        for (int i = 0; i < aliveParticles.Count; i++)
+        {
+            ParticleBehaviour other = aliveParticles[i];
+            if (particle == other) continue;
+
+            float distance = Vector3.Distance(particle.transform.position, other.transform.position);
+            if (distance <= blendDistance)
+            {
+                //float blendAmount = 1f - (distance / blendDistance);
+                float blendAmount = Mathf.InverseLerp(0, blendDistance, distance);
+                particle.Blend(other, blendAmount);
+            }
+        }
+    }
+}
+
+
 ===== PARTICLE SYSTEM UNITY EDITOR =====
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEditor;
+
+[CustomEditor(typeof(ParticleSystemBehaviour))]
+public class ParticleSystemBehaviourEditor : Editor
+{
+    SerializedProperty particlePrefab;
+    SerializedProperty frequency;
+    SerializedProperty initShape;
+    SerializedProperty initPos;
+    SerializedProperty width;
+    SerializedProperty length;
+    SerializedProperty sizeX;
+    SerializedProperty sizeY;
+    SerializedProperty sizeZ;
+    SerializedProperty firework;
+    SerializedProperty minLines;
+    SerializedProperty maxLines;
+    SerializedProperty shouldTimeout;
+    SerializedProperty timeout;
+
+    void OnEnable()
+    {
+        particlePrefab = serializedObject.FindProperty("particlePrefab");
+        frequency = serializedObject.FindProperty("frequency");
+        initShape = serializedObject.FindProperty("initShape");
+        initPos = serializedObject.FindProperty("initPos");
+        width = serializedObject.FindProperty("width");
+        length = serializedObject.FindProperty("length");
+        sizeX = serializedObject.FindProperty("sizeX");
+        sizeY = serializedObject.FindProperty("sizeY");
+        sizeZ = serializedObject.FindProperty("sizeZ");
+        firework = serializedObject.FindProperty("firework");
+        minLines = serializedObject.FindProperty("minLines");
+        maxLines = serializedObject.FindProperty("maxLines");
+        shouldTimeout = serializedObject.FindProperty("shouldTimeout");
+        timeout = serializedObject.FindProperty("timeout");
+
+    }
+
+    public override void OnInspectorGUI()
+    {
+        serializedObject.Update();
+
+        var behaviour = (ParticleSystemBehaviour)target;
+
+
+        EditorGUILayout.LabelField("General information", EditorStyles.boldLabel);
+        EditorGUILayout.PropertyField(particlePrefab);
+        EditorGUILayout.PropertyField(frequency);
+        EditorGUILayout.PropertyField(initShape);
+
+        if (behaviour.initShape == ParticleSystemBehaviour.InitShape.Point) {
+            EditorGUILayout.PropertyField(initPos);
+        }
+        else if (behaviour.initShape == ParticleSystemBehaviour.InitShape.Rectangle) {
+            EditorGUILayout.PropertyField(width);
+            EditorGUILayout.PropertyField(length);
+        }
+        else if (behaviour.initShape == ParticleSystemBehaviour.InitShape.Cube) {
+            EditorGUILayout.PropertyField(sizeX);
+            EditorGUILayout.PropertyField(sizeY);
+            EditorGUILayout.PropertyField(sizeZ);
+        }
+        EditorGUILayout.PropertyField(firework);
+        if (behaviour.firework) {
+            EditorGUILayout.PropertyField(minLines);
+            EditorGUILayout.PropertyField(maxLines);
+            behaviour.shouldTimeout = true;
+        }
+        EditorGUILayout.PropertyField(shouldTimeout);
+        if (behaviour.shouldTimeout) {
+            EditorGUILayout.PropertyField(timeout);
+        }
+
+        serializedObject.ApplyModifiedProperties();
+    }
+}
+
+
 ===== PARTICLE =====
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class ParticleBehaviour : MonoBehaviour
+{
+    public float minLifetime;
+    public float maxLifetime;
+    public float minSize;
+    public float maxSize;
+    public float radius;
+    public enum SpriteLife {
+        Distance,
+        Time
+    }
+    public SpriteLife spriteLife;
+    public float distanceThreshold;
+
+    public enum Movement {
+        Straight,
+        UpWind,
+        Tornado,
+        Firework
+    }
+    public Movement movType;
+
+    // upwind values
+    public float upwardForce;
+    public float horizontalForce;
+    // straight values
+    public float minSpeed;
+    public float maxSpeed;
+    // tornado values
+    private float tornadoRadius;
+    public float tornadoHeight;
+    public float minRotationSpeed;
+    public float maxRotationSpeed;
+    public float minTornadoRadius;
+    public float maxTornadoRadius;
+    public float verticalSpeed;
+    private float rotationSpeed;
+    private float rotationAngle;
+
+    // private
+    private Vector3 velocity;
+    private Vector3 startPos;
+    private float lifetime;
+    private float age;
+    private float distance;
+
+    public enum Rendering {
+        ColourChange,
+        SpriteSheet
+    }
+    public bool defineColour;
+    public Color startColour;
+    public Color endColour;
+    private SpriteRenderer image;
+    public Sprite[] sprites;
+    private int currentSpriteIndex;
+    public enum BlendType {
+        None,
+        Additive,
+        Multiplicative
+    }
+    public BlendType blendType;
+    
+    // Start is called before the first frame update
+    public void Initialize(Vector3 position, Vector3 decidedVelocity) {
+        this.startPos = position;
+        transform.position = position;
+        transform.localScale = 0.1f * Random.Range(minSize, maxSize)*Vector3.one;
+        switch(movType) {
+            case Movement.Straight:
+                float straightSpeed = Random.Range(minSpeed, maxSpeed);
+                this.velocity = Random.insideUnitSphere*straightSpeed;
+                break;
+            case Movement.UpWind:
+                this.velocity = Vector3.zero;
+                break;
+            case Movement.Tornado:
+                this.velocity = Vector3.zero;
+                this.rotationSpeed = Random.Range(minRotationSpeed, maxRotationSpeed);
+                this.rotationAngle = 0f;
+                this.tornadoRadius = Random.Range(minTornadoRadius, maxTornadoRadius);
+                transform.localScale = 0.1f * minSize*Vector3.one;
+                break;
+            case Movement.Firework:
+                float speed = Random.Range(minSpeed, maxSpeed);
+                this.velocity = decidedVelocity*speed;
+                break;
+
+        }
+        this.lifetime = Random.Range(minLifetime, maxLifetime);
+        this.age = 0f;
+        this.GetComponent<SpriteRenderer>().sprite = sprites[0];
+        if (defineColour) this.GetComponent<SpriteRenderer>().color = startColour;
+        this.image = GetComponent<SpriteRenderer>();
+        this.currentSpriteIndex = 0;
+        this.radius = Mathf.Max(image.bounds.size.x, image.bounds.size.y) * 0.5f;
+    }
+
+    public void Blend(ParticleBehaviour other, float blendAmount) {
+        Color color = this.image.color;
+        switch (blendType) {
+            case BlendType.None:
+            break;
+            case BlendType.Additive:
+                color += other.image.color * blendAmount;
+                break;
+            case BlendType.Multiplicative:
+                color *= Color.Lerp(Color.white, other.image.color, blendAmount);
+                break;
+    }
+    this.image.color = color;
+    }
+    void Start()
+    { 
+    }
+
+    // Update is called once per frame
+    public void Update()
+    {
+        this.age += Time.deltaTime;
+        this.distance = Vector3.Distance(this.startPos, this.transform.position);
+
+        if (this.age <= this.lifetime) {
+            
+            // velocity determined for forces acting on the particle
+            switch (movType) {
+                case Movement.UpWind:
+                    velocity += upwardForce * 0.001f * Vector3.up;
+                    velocity += horizontalForce * 0.01f * new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)).normalized;
+                    transform.position += this.velocity*Time.deltaTime;
+                    break;
+                case Movement.Straight:
+                    transform.position += this.velocity* Time.deltaTime;
+                    break;
+                case Movement.Tornado:
+                    rotationAngle += rotationSpeed * Time.deltaTime;
+                    float verticalDistance = Mathf.Clamp01(Mathf.Abs(transform.position.y-startPos.y)/(tornadoHeight*0.7f));
+                    transform.localScale = 0.1f * Mathf.Lerp(minSize, maxSize, verticalDistance)*Vector3.one;
+                    float radiusOffset = Mathf.Lerp(0f, tornadoRadius, verticalDistance);
+                    float newX = Mathf.Cos(rotationAngle) * radiusOffset;
+                    float newZ = Mathf.Sin(rotationAngle) * radiusOffset;
+                    float newY = Mathf.Lerp(0f, tornadoHeight, age/lifetime);
+                    transform.position = startPos + new Vector3(newX, newY, newZ);
+                    break;
+                case Movement.Firework:
+                    float normalLife = (age*0.3f) / lifetime;
+                    float fallSpeed = Mathf.Lerp(0f, 2f, normalLife);
+                    velocity += fallSpeed * Vector3.down;
+                    transform.position += this.velocity* Time.deltaTime;
+                    break;
+            }
+
+            transform.LookAt(Camera.main.transform);
+            transform.Rotate(0, 180, 0);
+
+            // determining look (sprite/colour) of the particle
+            float alphaRatio = 1f;
+            Color color = this.image.color;
+            // aging depends on which ratio is chosen
+            float lifeRatio = 1;
+            switch (spriteLife) {
+                case SpriteLife.Distance:
+                    lifeRatio = distance/distanceThreshold;
+                break;
+                case SpriteLife.Time:
+                    lifeRatio = age/lifetime;
+                break;
+            }
+            if (defineColour) color = Color.Lerp(startColour, endColour, lifeRatio);
+            int nextSpriteIndex = Mathf.Clamp(Mathf.FloorToInt(lifeRatio * sprites.Length), 0, sprites.Length-1);
+                    if (nextSpriteIndex != currentSpriteIndex) {
+                        currentSpriteIndex = nextSpriteIndex;
+                        image.sprite = sprites[currentSpriteIndex];
+                    }
+            if (lifeRatio > 0.7f) {
+                    alphaRatio = Mathf.Clamp01((lifeRatio - age)/(lifeRatio * 0.3f));
+            }
+            color.a *= alphaRatio;           
+            this.image.color = color;
+        }
+        else {Destroy(gameObject);}
+    }
+}
+
+
 ===== PARTICLE UNITY EDITOR =====
+
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class SystemSpawnBehaviour : MonoBehaviour
+{
+    public GameObject systemPrefab;
+    public float frequency;
+    public float height;
+    public float width;
+    public enum AlongAxis {
+        X,
+        Z
+    }
+    public AlongAxis alongAxis;
+    private Vector3 leftDownCorner;
+    private Vector3 rightDownCorner;
+    private Vector3 leftUpCorner;
+    private Vector3 rightUpCorner;
+    public GameObject[] particles;
+
+
+    private ParticleSystemBehaviour createSystem(Vector3 position, GameObject particle) {
+        ParticleSystemBehaviour newSystem = Instantiate(systemPrefab, position, Quaternion.identity).GetComponent<ParticleSystemBehaviour>();
+        newSystem.Initialize(position, particle);
+        aliveSystems.Add(newSystem);
+        return newSystem;
+    }
+
+    private List<ParticleSystemBehaviour> aliveSystems = new List<ParticleSystemBehaviour>();
+    private float frequency_timer = 0f;
+    // Start is called before the first frame update
+    void Start()
+    {
+        if (alongAxis == AlongAxis.Z) {
+            leftDownCorner = new Vector3(transform.position.x, transform.position.y - height, transform.position.z - width);
+            rightDownCorner = new Vector3(transform.position.x, transform.position.y - height, transform.position.z + width);
+            rightUpCorner = new Vector3(transform.position.x, transform.position.y + height, transform.position.z + width);
+            leftUpCorner = new Vector3(transform.position.x, transform.position.y + height, transform.position.z - width);
+        } else {
+            leftDownCorner = new Vector3(transform.position.x - width, transform.position.y - height, transform.position.z);
+            rightDownCorner = new Vector3(transform.position.x + width, transform.position.y - height, transform.position.z);
+            rightUpCorner = new Vector3(transform.position.x + width, transform.position.y + height, transform.position.z);
+            leftUpCorner = new Vector3(transform.position.x - width, transform.position.y + height, transform.position.z);
+        }
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        frequency_timer += Time.deltaTime;
+        if (frequency_timer >= frequency) {
+            float rdmLength = Random.Range(0f, 1f);
+            float rdmHeight = Random.Range(0f, 1f);
+            Vector3 randomPos = leftDownCorner + rdmLength * (rightDownCorner - leftDownCorner) + rdmHeight * (leftUpCorner - leftDownCorner);
+            
+            int rdmIndex = Random.Range(0, particles.Length);
+            createSystem(randomPos, particles[rdmIndex]);
+            frequency_timer = 0f;
+        }
+        removeDeadSystems();
+        updateAliveSystems();
+    }
+
+    private void removeDeadSystems() {
+        aliveSystems.RemoveAll(system => system == null);
+    }
+
+    private void updateAliveSystems() {
+        for (int i = 0; i < aliveSystems.Count; i++) {
+            ParticleSystemBehaviour system = aliveSystems[i];
+            system.Update();
+        }
+    }
+}
+
 ===== PARTICLE SYSTEM SPAWNER =====
