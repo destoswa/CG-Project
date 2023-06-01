@@ -1275,6 +1275,122 @@ public class ParticleBehaviour : MonoBehaviour
 
 ===== PARTICLE UNITY EDITOR =====
 
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEditor;
+
+[CustomEditor(typeof(ParticleBehaviour))]
+public class ParticleBehaviourEditor : Editor
+{
+    SerializedProperty minLifetime;
+    SerializedProperty maxLifetime;
+    SerializedProperty minSize;
+    SerializedProperty maxSize;
+    SerializedProperty defineColour;
+    SerializedProperty startColour;
+    SerializedProperty endColour;
+    SerializedProperty sprites;
+    SerializedProperty blendType;
+    SerializedProperty spriteLife;
+    SerializedProperty movType;
+    SerializedProperty distanceThreshold;
+    SerializedProperty minSpeed;
+    SerializedProperty maxSpeed;
+    SerializedProperty upwardForce;
+    SerializedProperty horizontalForce;
+    SerializedProperty verticalSpeed;
+    SerializedProperty tornadoHeight;
+    SerializedProperty minRotationSpeed;
+    SerializedProperty maxRotationSpeed;
+    SerializedProperty minTornadoRadius;
+    SerializedProperty maxTornadoRadius;
+
+
+
+    void OnEnable()
+    {
+        minLifetime = serializedObject.FindProperty("minLifetime");
+        maxLifetime = serializedObject.FindProperty("maxLifetime");
+        minSize = serializedObject.FindProperty("minSize");
+        maxSize = serializedObject.FindProperty("maxSize");
+        sprites = serializedObject.FindProperty("sprites");
+        defineColour = serializedObject.FindProperty("defineColour");
+        startColour = serializedObject.FindProperty("startColour");
+        endColour = serializedObject.FindProperty("endColour");
+        blendType = serializedObject.FindProperty("blendType");
+        spriteLife = serializedObject.FindProperty("spriteLife");
+        movType = serializedObject.FindProperty("movType");
+        distanceThreshold = serializedObject.FindProperty("distanceThreshold");
+        minSpeed = serializedObject.FindProperty("minSpeed");
+        maxSpeed = serializedObject.FindProperty("maxSpeed");
+        upwardForce = serializedObject.FindProperty("upwardForce");
+        horizontalForce = serializedObject.FindProperty("horizontalForce");
+        verticalSpeed = serializedObject.FindProperty("verticalSpeed");
+        tornadoHeight = serializedObject.FindProperty("tornadoHeight");
+        minRotationSpeed = serializedObject.FindProperty("minRotationSpeed");
+        maxRotationSpeed = serializedObject.FindProperty("maxRotationSpeed");
+        minTornadoRadius = serializedObject.FindProperty("minTornadoRadius");
+        maxTornadoRadius = serializedObject.FindProperty("maxTornadoRadius");
+    }
+
+    public override void OnInspectorGUI()
+    {
+        serializedObject.Update();
+
+        var behaviour = (ParticleBehaviour)target;
+
+        EditorGUILayout.LabelField("General information", EditorStyles.boldLabel);
+        EditorGUILayout.PropertyField(minLifetime);
+        EditorGUILayout.PropertyField(maxLifetime);
+        EditorGUILayout.PropertyField(minSize);
+        EditorGUILayout.PropertyField(maxSize);
+        EditorGUILayout.PropertyField(sprites);
+        EditorGUILayout.PropertyField(defineColour);
+
+        if (behaviour.defineColour) {
+            EditorGUILayout.PropertyField(startColour);
+            EditorGUILayout.PropertyField(endColour);
+        }
+
+        EditorGUILayout.PropertyField(blendType);
+
+        GUILayout.Space(10);
+        EditorGUILayout.LabelField("Blending colour", EditorStyles.boldLabel);
+        EditorGUILayout.PropertyField(spriteLife);
+
+        if (behaviour.spriteLife == ParticleBehaviour.SpriteLife.Distance)
+        {
+            EditorGUILayout.PropertyField(distanceThreshold);
+        }
+
+        GUILayout.Space(10);
+        EditorGUILayout.LabelField("Movement", EditorStyles.boldLabel);
+        EditorGUILayout.PropertyField(movType);
+
+        if (behaviour.movType == ParticleBehaviour.Movement.Straight | behaviour.movType == ParticleBehaviour.Movement.Firework)
+        {
+            EditorGUILayout.PropertyField(minSpeed);
+            EditorGUILayout.PropertyField(maxSpeed);
+        }
+        else if (behaviour.movType == ParticleBehaviour.Movement.UpWind)
+        {
+            EditorGUILayout.PropertyField(upwardForce);
+            EditorGUILayout.PropertyField(horizontalForce);
+        }
+        else if (behaviour.movType == ParticleBehaviour.Movement.Tornado) {
+            EditorGUILayout.PropertyField(verticalSpeed);
+            EditorGUILayout.PropertyField(tornadoHeight);
+            EditorGUILayout.PropertyField(minRotationSpeed);
+            EditorGUILayout.PropertyField(maxRotationSpeed);
+            EditorGUILayout.PropertyField(minTornadoRadius);
+            EditorGUILayout.PropertyField(maxTornadoRadius);
+        }
+
+        serializedObject.ApplyModifiedProperties();
+    }
+}
+
 
 ===== PARTICLE SYSTEM SPAWNER =====
 
