@@ -245,9 +245,9 @@ img {
 		<ul>
 			<li><a href="#ta_movement">Movement</a>
 				<ul>
-					<li><a href="ta_FPC">First Person Controller</a></li>
-					<li><a href="ta_BezierCurves">Bezier curves</a></li>
-					<li><a href="ta_FocusZones">Focus zones</a></li>
+					<li><a href="#ta_FPC">First Person Controller</a></li>
+					<li><a href="#ta_BezierCurves">Bezier curves</a></li>
+					<li><a href="#ta_FocusZones">Focus zones</a></li>
 				</ul>
 			</li>
 			<li><a href="#ta_particleeffect">Particle effects</a></li>
@@ -260,9 +260,9 @@ img {
 		<ul>
 			<li><a href="#res_movement">Movement</a>
 				<ul>
-					<li><a href="res_FPC">First Person Controller</a></li>
-					<li><a href="res_BezierCurves">Bezier curves</a></li>
-					<li><a href="res_FocusZones">Focus zones</a></li>
+					<li><a href="#res_FPC">First Person Controller</a></li>
+					<li><a href="#res_BezierCurves">Bezier curves</a></li>
+					<li><a href="#res_FocusZones">Focus zones</a></li>
 				</ul>
 			</li>
 			<li><a href="#res_particleeffect">Particle effects</a></li>
@@ -271,24 +271,30 @@ img {
 			<li><a href="#res_scene">Scene</a></li>
 		</ul>
 	</li>
-	<li id="conclusion">Discussion and conclusion</li>
+	<li><a href="#conclusion">Discussion and conclusion</a></li>
+	<li><a href="#workload">Members contributions</a></li>
 	<li><a href="#references">References</a></li>
 
 </ul>
 
 <h2 id="abstract">Abstract</h2>
 <h3>The Magic Guild</h3>
-<p>Our goal is to create a little medieval fantasy magic shop. The player, in first person view, can walk around the shop that displays spells or even potions. The spells are small exhibits of a variety of particle effect systems. The magic items could also be upgraded with implicit surfaces and bloom techniques.
+<p>
+	We have created a small medieval fantasy shop, The Magic Guild, that the player can explore in first-person view.<br>
+	The building is shaped in a way that it can be walked around in a cyclic path. The player can either manually move around using WASD hotkeys, or press Space to enter an automated trajectory.
+	This trajectory follows a Bezier curve and focuses on the important displays of the shop.<br>
+	The most interesting displays are spells created through particle systems and a cauldron brewing a potion under a firework.<br>
+	Feel free to explore around! There are many pieces of decoration and some of them might even have amusing features...
 </p>
 <h2 id="techapproach">Technical approach</h2>
 <h3 id="ta_movement">Movement</h3>
-<p>Regarding the movement, the idea is to allow the player to explore the hut at her/his own rate or to let go of the command, sit back and enjoy a confortable preset ride.</p>
+<p>Regarding the movement, the idea is to allow the player to explore the hut at their own rate or to let go of the command, sit back and enjoy a comfortable preset ride.</p>
 <h4 id="ta_FPC">First Person Controller</h4>
 <p>
 	The idea regarding the motion of the camera is to be able to move freely in the scene, as if 
-	the camera is a physical client of the shop. Moreover, the user should be able to enter <i>in spectate mode</i> which turns off
-	the controls and make the camera travel automatically through the scene.<br>
-	The control of the camera have been implemented by attaching it to a non-textural object with a <i>First Person Controller</i>
+	the camera is a physical client of the shop. Moreover, the user should be able to enter a <i>spectator mode</i> which turns off
+	the controls and makes the camera travel automatically through the scene.<br>
+	The controls of the camera have been implemented by attaching it to a non-textural object with a <i>First Person Controller</i>
 	script applied to the object. It can turn around and look up and down (body turns around (yaw) and camera goes up and down (pitch))
 	following the movement of the mouse and it can move around using the controls W-A-S-D.<br>
 </p>
@@ -297,28 +303,39 @@ img {
 <p>
 	Regarding the path that the camera is supposed to follow, it has been made by creating a system of linked Bezier curves with 
 	an invisible target following it with a given speed (see video 1) and the user can then decide to follow the
-	target by pressing the <i>space</i> bar (see video 2 and 3). When the player do so, the green target is teleported to the nearest
-	position of the path to the player and a serie of attractive, rejecting and wind forces are applied to the player so that it follows
+	target by pressing the <i>space</i> bar (see video 2 and 3). When the player does so, the green target is teleported to the nearest
+	position of the path to the player and a series of attractive, rejecting and wind forces are applied to the player so that it follows
 	the target as smoothly as possible.
 </p>
 
 <h4 id="ta_FocusZones">Focus zones</h4>
 <p>
-	In order for the player to look at objects of interest during the traveling along the bezier curves, focuse zones where implemented. Those zones
-	consist in invisible cubes with a colider that is trigger when the player and the target enter them. The effect is to change the object onwhich
-	the Player focus and the speed of the target can also be changed.
+	In order for the player to look at objects of interest whilst traveling along the bezier curves, we have implemented focus zones. Those zones
+	consist of invisible cubes with a collider that is triggered when both player and target enter them. The effect is to change the object onwhich
+	the player focuses. The speed of the target can also be changed.
 </p>
 
 <h3 id="ta_particleeffect">Particle effect</h3>
+<p>
+	All particle systems' behaviour is described through the two same scripts: <i>Particle System Behaviour</i> and <i>Particle Behaviour</i>.
+	To be able to define different sorts of systems, each script has many different parameters, such as the particles life span, size, sprite image, colour, movement and more.<br>
+	The <i>Particle System Behaviour</i> defines general parameters such as the particles spawning frequency and the shape of the starting point. It takes a particle <i>GameObject</i>
+	as a variable and spawns instances of it, keeping track of the alive particles to update and deleting those that auto-destroyed after reaching the end of their lifetime.<br>
+	The <i>Particle Behaviour</i> computes in run-time all the different modifications applied on one particle while it lives. The velocity, transparency, colour or even sprite itself might change before the particle dies.<br><br>
+	Particles themselves are rendered in 3D space with a 2D sprite. At each update of the particle, the sprite is set to look at the camera to achieve the billboard effect.<br><br>
+	Finally, we also have a <i>System Spawn</i> script, which takes a variant of a particle system and spawns instances of it at random. The frequency at which systems spawn and
+	the size of the vertical plane in which they appear can be user-defined.<br>
+	We used this system to create the fireworks, where each individual firework is a separate particle system.
+</p>
 <h3 id="ta_shader">Shader</h3>
-<p>In order to create a cauldron having an animated liquid-like surface. A round surface with a high number of vertices was created on blender and a custom shader was added to it.
-This custom shader was created by using a surface-type shader of unity and redefining the mesh sheder. In order to create the effect, the coordinates of the vertices were expressed with respect to
+<p>The goal is to create a cauldron with an animated liquid-like surface. A round surface with a high number of vertices was created on blender and a custom shader was added to it.
+This custom shader was created by using a surface-type shader of Unity and re-defining the mesh shader. In order to create the effect, the coordinates of the vertices were expressed with respect to
 the center of the surface and set to vary in time, following sinusoids-like functions.
 </p>
 <h3 id="ta_lightning">Lightning</h3>
-<p>The lightning effect was done by creating a script that construct lightning object. Each of those objects consist in a set of segments of random sizes, having random angles between them and a
+<p>The lightning effect was done by creating a script that constructs a lightning object. Each of those objects consist of a set of segments of random sizes, having random angles between them and a
 probability to branch on a new subset of lines. The generation of lightning is also randomized around a fixed a value. In order to make the lightning bloom, the <i>Post Processing</i> package of 
-unity is used in order to apply blooming effect to an emitive texture that is set to each lightning object.
+Unity is used in order to apply blooming effect to an emitive texture that is set to each lightning object.
 </p>
 <h3 id="ta_scene">Scene</h3>
 
@@ -330,7 +347,6 @@ unity is used in order to apply blooming effect to an emitive texture that is se
 	</p>
 	<center><video width="80%" controls>
 		<source src="video_focus_zones.mp4" type="video/mp4">
-		Your brother does not support the video tag
 	</video></center>
 	<p>Video 1 : Effecto of the focus zone on the player and the target. The focus zones meshes are shown in light green on the right screen.</p>
 	
@@ -370,6 +386,44 @@ unity is used in order to apply blooming effect to an emitive texture that is se
 	</video></center>
 	<p>Video 5 : Effect of the focus zone on the player and the target. The focus zones meshes are shown in light green on the right screen.</p>
 <h3 id="res_particleeffect">Particle effect</h3>
+	<p>
+		Below are the different particle effects we managed to create.
+	</p>
+	<center><video width="80%" controls>
+		<source src="fire.mp4" type="video/mp4">
+	</video></center>
+	<figcaption>Fire</figcaption>
+	<p><br></p>
+	<center><video width="80%" controls>
+		<source src="snow.mp4" type="video/mp4">
+	</video></center>
+	<figcaption>Snow</figcaption>
+	<p><br></p>
+	<center><video width="80%" controls>
+		<source src="stormy_cloud.mp4" type="video/mp4">
+	</video></center>
+	<figcaption>Stormy cloud</figcaption>
+	<p><br></p>
+	<center><video width="80%" controls>
+		<source src="tornado.mp4" type="video/mp4">
+	</video></center>
+	<figcaption>Tornado</figcaption>
+	<p><br></p>
+	<center><video width="80%" controls>
+		<source src="fireworks.mp4" type="video/mp4">
+	</video></center>
+	<figcaption>Fireworks</figcaption>
+	<p><br></p>
+	<p>
+		Since all the particle systems are created with the same script, we need a lot of different parameters to tweak. This is why we have
+		also overridden the Unity inspector with our own to make navigating between all the parameters easier. This also avoids errors that could have
+		happened from modifying parameters that shouldn't be in some cases. <br>
+		Here is what the new inspector looks like: 
+	</p>
+	<center><video width="40%" controls>
+		<source src="inspector.mp4" type="video/mp4">
+	</video></center>
+
 <h3 id="res_shader">Shader</h3>
 	<p>
 		blablabla
@@ -392,177 +446,16 @@ unity is used in order to apply blooming effect to an emitive texture that is se
 	
 <h3 id="res_scene">Scene</h3>
 <h2 id="conclusion">Discussion and conclusion</h2>
+<h2 id ="workload">Members contributions</h2>
+<ul>
+	<li> <b>Alice Reymond (1/3):</b> Particle systems, final video edit</li>
+</ul>
 <h2 id="references">References</h2>
 <ul>
+	<li> Martin Allen, <i>no date</i>, <a href="https://web.cs.wpi.edu/~matt/courses/cs563/talks/psys.html" target="blank">Particle Systems</a></li>
+	<li> Solomon Justin, 2023/12/29, <a href = "https://www.youtube.com/watch?v=Hl2L_rfOBaQ&t=871s" target="_blank">Introduction to Computer Graphics (Lecture 7): Particle systems, ODEs, and Euler's Method</a></li>
+	<li> Greer Matt, 2012/11/21, <a href="http://buildnewgames.com/particle-systems/" target="blank">Particle Systems From the Ground Up</a></li>
 	<li></li>
-	<li></li>
-	<li></li>
 </ul>
 
-
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-<h3>Type of result</h3>
-<p>Our project will be an interactive scene made on Unity (cf <a href="#resources">Resources</a>) that the viewer can walk around.</p>
-
-<h3>Concept Art</h3>
-<p>Spells visual effect</p>
-
-<div class="row">
-    <div class="column">
-        <img src="images/particle_effect1.jpeg">
-    </div>
-    <div class="column">
-        <img src="images/particle_effect2.jpeg">
-    </div>
-    <div class="column">
-        <img src="images/particle_effect3.jpeg">
-    </div>
-</div>
-<div class="row">
-    <div class="column">
-        <img src="images/particle_effect6.jpg">
-    </div>
-    <div class="column">
-        <img src="images/particle_effect4.jpg">
-    </div>
-    <div class="column">
-        <img src="images/particle_effect5.jpeg">
-    </div>
-</div>
-
-<img src="images/particle_effect3.jpg"
-    style="margin: auto;
-            width: 100%;
-            max-width: 100%;
-            max-height:100%">
-
-<p>Shop design concept</p>
-
-<div class="row">
-    <div class="column">
-        <img src="images/shop1.jpg">
-    </div>
-    <div class="column">
-        <img src="images/shop2.jpg">
-    </div>
-    <div class="column">
-        <img src="images/shop3.jpg">
-    </div>
-</div>
-<div class="row">
-    <div class="column">
-        <img src="images/shop4.jpg">
-    </div>
-    <div class="column">
-        <img src="images/shop5.jpg">
-    </div>
-</div>
-
-<p>Sketches for the shop's plan</p>
-
-<div class="row">
-    <div class="column">
-        <img src="images/sketch1.jpg">
-    </div>
-    <div class="column">
-        <img src="images/sketch3.jpg">
-    </div>
-    <div class="column">
-        <img src="images/sketch2.jpg">
-    </div>
-</div>
-<div class="row">
-    <div class="column">
-        <img src="images/sketch4.jpg">
-    </div>
-</div>
-
-<h2 id="goals_deliverables">Goals and Deliverables</h2>
-<p>The main goal of this project is the grasp of particle effect techniques through the implementation of magic effects shown in a magic shop.</p>
-<p>The baseline plan would consist on the following:</p>
-<ul>
-	<li>a fonctional scene in which it is possible to move around</li>
-	<li>Fonctional basic particle effects</li>
-	<li>Functional lighting</li>
-</ul>
-
-<h3>Optional extensions</h3>
-<p>In order to give a more diversed scene and add some mechanics, following are some ideas of possible improvements: </p>
-<ul>
-	<li>Additionnal and more complex effects (e.g. different types of spells, having torch lighting up around the spell as the camera gets aligned with it)</li>
-    <li>Adding glowing potions (bloom effect)</li>
-    <li>Shelves of potions that would use the bloom effect and implicit surfaces techniques to give them a bubbly and glowing look.</li>
-	<li>Interactive effects on some objects of the scene. An idea in progress is the implementation of Neural Cellular automata</li>
-</ul>
-
-<h2 id="schedule">Schedule</h2>
-<ul>
-	<li><b>Week 9 : </b>Documentation</li>
-	<li><b>Week 10 : </b>Set up the scene and camera physics</li>
-	<li><b>Week 11 - 12 : </b>Creation of the different particle effects and integration of them into the scene</li>
-	<li><b>Week 13 : </b>Finalization of the different visual aspects of the scene (assets, textures, lighting, etc..)</li>
-	<li><b>Week 14 : </b>Video and report</li>
-</ul>
-<p>We have not subdivided the weekly goals for each of our group's members because, up until now, we have preferred to work all together on each task. We believe our group's interaction works better this way and it also allows us to each have a complete understanding of every aspect of our project.</p>
-<h2 id="resources">Resources</h2>
-We are planning to use the following resources:
-<ul>
-	<li><b>Blender</b> will be used for the creation of the different assets</li>
-	<li><b>Unity</b> will be use for the support of the scene and physics of the camera</li>
-</ul>
-
-<h2 id="Milestone">Milestone Report</h2>
-<h3>What has been done</h3>
-<p>So far, we have been working mainly on two aspect of the project: The Particle effect and the motion of the camera in the scene:</p>
-<ul>
-	<li><b>Particle effect:</b> The particles are GameObjects generated from a source with a few parameters regarding their
-	temporal and spatial evolution. Visually, each particle is made of a sprite. Until now, a first effect creating fire has been fine tuned.</li>
-	<li><b>Motion of the camera :</b>
-	The idea regarding the motion of the camera is to be able to move freely in the scene, as if 
-	the camera is a physical client of the shop. Moreover, the user should be able to enter <i>in spectate mode</i> which turns off
-	the controls and make the camera travel automatically through the scene.<br>
-	The control of the camera have been implemented by attaching it to a texture-less object with a <i>First Person Controller</i>
-	script applied to the object. It can turn around and look up and down (body turns around (yaw) and camera goes up and down (pitch))
-	following the movement of the mouse and it can move around using the controls W-A-S-D.<br>
-	Regarding the path that the camera is supposed to follow, it has been made by creating a system of linked Bezier curves with 
-	a green target following it with a given speed (see video 1) and the user can then decide to follow the
-	target by pressing the <i>space</i> bar (see video 2 and 3). When the player do so, the green target is teleported to the nearest
-	position of the path to the player and a serie of attractive, rejecting and wind forces are applied to the player so that it follows
-	the target as smoothly as possible.
-	</li>
-<ul>
-<p></p>
-<video width="80%" controls>
-	<source src="video_creation_bezier.mp4" type="video/mp4">
-	Your brother does not support the video tag
-</video>
-<p>Video 1 : Demo of the creation of two Bezier curves and animation of the target running along the path.</p>
-
-<video width="80%" controls>
-	<source src="video_animation_cropped.mp4" type="video/mp4">
-	Your brother does not support the video tag
-</video>
-<p>Video 2 : Demo of the camera moving around and then turning into spectate mode. The left screen shows the scene and the right screen shows
-the view of the camera during the demo. On the left screen, the player is shown in white and the target in green.</p>
-
-<video width="80%" controls>
-	<source src="video_animation_zoom.mp4" type="video/mp4">
-	Your brother does not support the video tag
-</video>
-<p>Video 3 : Zoom on the scene of Video 2.</p>
-
-<h3>Update on the schedule</h3>
-As it can be seen, we have mostly been working on the particle effect and motions but the scene has been put aside. Since there
-is still some work to do on those aspect, we are going to split the work as following:
-<ul>
-	<li>Alice will continue working on the particle effect : Creating more effects (ice, lightning, ..) and implementing a glowing effect.</li>
-	<li>Swann will continue working on the motion of the camera: Smoothing the lookat motion, make the target appear to the smallest
-	location without having the rejecting force so strong that the player is rejected backward before bollowing the target. Implementing 
-	focus zones that are going to force the player to look at specific objects of interest when it is on spectate mode. </li>
-	<li>Jad is going to focus more on the creation of assets and the scene: Creating the scene on unity, using libraries of assets
-	and creating some of them on Blender (has the pedestral onwhich the effects will be shown).</li>
-</ul>
-Once Jad and Swann will have finish their part, they will also focus on the creation and fine-tuning of different particle effects.
 </body>
