@@ -1276,6 +1276,8 @@ public class ParticleBehaviour : MonoBehaviour
 ===== PARTICLE UNITY EDITOR =====
 
 
+===== PARTICLE SYSTEM SPAWNER =====
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -1351,5 +1353,3 @@ public class SystemSpawnBehaviour : MonoBehaviour
         }
     }
 }
-
-===== PARTICLE SYSTEM SPAWNER =====
